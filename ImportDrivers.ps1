@@ -1,3 +1,8 @@
+<#
+.NOTES
+  Written by Kent Agerlund - I think - it wasn't written by me though
+#>
+
 Function Get-SCCMDriverCategory
 {
     [CmdletBinding()]
