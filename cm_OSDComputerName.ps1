@@ -1,4 +1,11 @@
-﻿$chType = Get-WmiObject -Class Win32_SystemEnclosure | Select-Object -ExpandProperty ChassisTypes
+<#
+.SYNOPSIS
+  cm_OSDComputerName.ps1
+.NOTES
+  written by me. :D
+#>
+
+$chType    = Get-WmiObject -Class Win32_SystemEnclosure | Select-Object -ExpandProperty ChassisTypes
 $serialNum = Get-WmiObject -Class Win32_SystemEnclosure | Select-Object -ExpandProperty SerialNumber
 
 Write-Output "INFO: wmi chassistypes = $chType"
