@@ -1,4 +1,4 @@
-﻿param (
+param (
     [parameter(Mandatory=$true)] [string] $DHCPSvr,
     [parameter(Mandatory=$true)] [string] $DHCPFqdn,
     [parameter(Mandatory=$true)] [string] $PXESvr,
@@ -13,6 +13,7 @@
 # set DHCP scope or server options for each CPU policy group
 
 function Set-DhcpV4Option {
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         [parameter(Mandatory=$True)] [string] $ComputerName,
         [parameter(Mandatory=$False)] [string] $ScopeID = ""
