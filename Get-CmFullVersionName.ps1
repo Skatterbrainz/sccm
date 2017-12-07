@@ -1,47 +1,47 @@
-<#
-.DESCRIPTION
-  queries Internet web page to map version number to display name version
-  for example 5.00.xxxx.xxxx --> "Current Branch YYMM"
-.PARAMETER VersionNumber
-  [required] (string) The base version number (e.g. "5.00.8455.1000")
-#>
 function Get-CmFullVersionName {
-	param (
-		[parameter(Mandatory=$True)]
-		[ValidateNotNullOrEmpty()]
-		[string] $VersionNumber
-	)
-	$weburl = "https://blogs.technet.microsoft.com/configmgrdogs/2014/02/07/configmgr-2012-version-numbers/"
-  try {
-  	$site  = Invoke-WebRequest -UseBasicParsing -Uri $weburl
-  }
-  catch {
-    write-error "the internet just puked in your face!"
-    break
-  }
-	$start = $site.Content.IndexOf("<tbody>") + 7
-	$end   = $site.Content.IndexOf("</tbody>")
-	$guts  = $site.Content
-	$tablecontents = $guts.substring($start, $end-$start)
+	<#
+	.SYNOPSIS
+		Get ConfigMgr Version Name from Build Number
+	.DESCRIPTION
+		Returns full ConfigMgr version name from Build Number string
+	.PARAMETER BuildNumber
+		Version build number, such as '5.0.8540.1611'
+	.EXAMPLE
+		Get-CmFullVersionName -BuildNumber '5.0.8540.1611'
+		Returns: "SCCM 1706 - Update to Rollup 1 (KB4042949)"
+	.NOTES
+		Ugly AF and Crude, but usually works okay
+		Thanks to System Center Dudes web site for the published data table
+	.OUTPUT
+		String containing full version name, or $null if no match
+	#>
+    param (
+        [parameter(Mandatory=$True, HelpMessage="Build Number")]
+        [ValidateNotNullOrEmpty()]
+        [string] $BuildNumber
+    )
+    $uri = 'https://www.systemcenterdudes.com/sccm-2012-version-numbers/'
+    $raw = (New-Object System.Net.WebClient).DownloadString($uri)
+    $raw = $raw.Replace("`n"," ")
 
-	$newtable = $tablecontents.Replace("<tr>","|")
-	$newtable = $newtable.Replace("</tr>`n","")
-	$newtable = $newtable.Replace("<td width=`"173`" valign=`"top`">","")
-	$newtable = $newtable.Replace("<td width=`"128`" valign=`"top`">",",")
-	$newtable = $newtable.Replace("<td width=`"98`" valign=`"top`">",",")
-	$newtable = $newtable.Replace("</td>","")
-	$newtable = $newtable.Replace("<p>","")
-	$newtable = $newtable.Replace("</p>","")
-	$newtable = $newtable.Replace("`n","")
+    $start = $raw.IndexOf('class="tablepress tablepress-id-1">')
+    $content = $raw.Substring($start+42)
+    $end = $content.IndexOf('</tbody>')
+    $content = $content.Substring(0, $end)
+    $data = $content -replace "</td>",""
+    $data = $data -replace "</tr>",""
+    $data = $data -split "td class"
 
-	$rows = $newtable.split("|")
-	$result = ""
-
-	foreach ($row in $rows) {
-		$cells = $row.Split(",")
-		if ($cells[1] -eq $VersionNumber) {
-			$result = $cells[0]
-		}
-	}
-	return $result
+    foreach ($row in $data) {
+        if ($row.StartsWith('="column-1"')) {
+            $name = ($row.Substring(12)) -replace '<', ''
+        }
+        elseif ($row.StartsWith('="column-2"')) {
+            $ver = ($row.Substring(12)) -replace '<', ''
+        }
+        if ($BuildNumber -eq $ver) {
+            Write-Output $name
+            break
+        }
+    }
 }
