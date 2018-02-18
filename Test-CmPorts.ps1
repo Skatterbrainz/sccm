@@ -1,4 +1,4 @@
-﻿param (
+param (
     [parameter(Mandatory=$True)]
     [ValidateNotNullOrEmpty()]
     [string] $IPAddress
@@ -8,7 +8,7 @@ if (Test-Connection -ComputerName $IPAddress -Count 1 -TimeToLive 1 -Quiet) {
     Write-Host "Host is online" -ForegroundColor Green
     foreach ($port in $ports) {
         try {
-            $test = New-Object System.Net.Sockets.TcpClient(“$IPAddress”, “$port”) -ErrorAction Stop
+            $test = New-Object System.Net.Sockets.TcpClient("$IPAddress", "$port") -ErrorAction Stop
             Write-Host "Port is open: $port" -ForegroundColor Green
         }
         catch {
