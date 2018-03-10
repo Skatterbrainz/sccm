@@ -129,7 +129,7 @@ function Get-ComputerNameInput {
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         Title="New Computer Name" Height="154" Width="425" Topmost="True" WindowStyle="ToolWindow"> 
     <Grid> 
-        <Label Name="Computername_label" Content="Location:" HorizontalAlignment="Left" Height="27" Margin="0,10,0,0" VerticalAlignment="Top" Width="241"/> 
+        <Label Name="Computername_label" Content="New Name:" HorizontalAlignment="Left" Height="27" Margin="0,10,0,0" VerticalAlignment="Top" Width="241"/> 
         <TextBox Name="Computername_text" HorizontalAlignment="Left" Height="27" Margin="146,10,0,0" TextWrapping="Wrap" Text=" " VerticalAlignment="Top" Width="220"/> 
         <Button Name="Continue_button" Content="Continue" HorizontalAlignment="Left" Margin="201,62,0,0" VerticalAlignment="Top" Width="75"/> 
     </Grid> 
