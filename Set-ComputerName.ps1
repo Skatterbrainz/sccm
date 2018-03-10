@@ -250,6 +250,7 @@ Write-Verbose "computer name is $computername"
 
 if (!$Testing) {
     Write-Verbose "assigning task sequence variables"
+    $tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment
     $tsenv.Value("OSDComputername") = $computername 
 }
 else { 
