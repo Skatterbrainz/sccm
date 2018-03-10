@@ -11,18 +11,27 @@ The is a switch parameter that is used to test the script outside of a SCCM Task
 If this -testing is used the script will not load the OSD objects that are only present while a task sequence is running. 
 instead it will use write-output to display the selection.  
 
-.PARAMETER NoLocation
-Skips using a Location code as part of the device name
+.PARAMETER DefaultName
+Default forced name value (default = "")
 
-.PARAMETER UseHyphens
-Uses a hyphen "-" character to concatenate Location, FormFactor and Serial number values.
-Is not used when -Interactive is supplied
+.PARAMETER UseLocation
+Switch to insert location into new name
 
-.PARAMETER Interactive
-Displays a GUI form for directly entering the device name
+.PARAMETER DefaultLocation
+Default location code, if -UseLocation is invoked
 
 .PARAMETER LocationFile
-Path and name of location codes table file.  Default is "locations.txt"
+Location look-up file, if -UseLocation is invoked
+
+.PARAMETER UseHyphens
+Concatenate name components with hyphen delimiter
+
+.PARAMETER SnMaxLen
+Maximum length of BIOS serial number, from right-most end, to use
+Default is 8
+
+.PARAMETER Interactive
+Prompt for name input using GUI form
 
 .EXAMPLE 
 powershell -ExecutionPolicy Bypass -File .\Set-ComputerName.ps1 -Testing
@@ -31,8 +40,13 @@ powershell -ExecutionPolicy Bypass -File .\Set-ComputerName.ps1 -Testing
 powershell -File .\Set-ComputerName.ps1 -Interactive
 
 .EXAMPLE
+powershell -File .\Set-ComputerName.ps1 -UseLocation -DefaultLocation "NYC"
+
+.EXAMPLE
 powershell -File .\Set-ComputerName.ps1 -UseHyphens
- 
+
+.EXAMPLE
+powershell -File .\Set-ComputerName.ps1 -Interactive -DefaultName "DT001"
 .NOTES 
 This is a very simple version of a OSD prompt for a computername. You can add extra validation to the computer name, for example a regular expression test  
 to ensure it meets standard form used in your environment. Addtional form object can be added to other options that you may want to set 
