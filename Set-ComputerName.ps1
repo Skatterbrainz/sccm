@@ -47,6 +47,7 @@ powershell -File .\Set-ComputerName.ps1 -UseHyphens
 
 .EXAMPLE
 powershell -File .\Set-ComputerName.ps1 -Interactive -DefaultName "DT001"
+ 
 .NOTES 
 This is a very simple version of a OSD prompt for a computername. You can add extra validation to the computer name, for example a regular expression test  
 to ensure it meets standard form used in your environment. Addtional form object can be added to other options that you may want to set 
@@ -67,7 +68,7 @@ param (
         [string] $DefaultName = "",
     [parameter(Mandatory=$False, HelpMessage="Use location code in name")]
         [switch] $UseLocation,
-	[parameter(Mandatory=$False, HelpMessage="Default location code")]
+    [parameter(Mandatory=$False, HelpMessage="Default location code")]
         [string] $DefaultLocation = "",
     [parameter(Mandatory=$False, HelpMessage="Location codes table file")]
         [string] $LocationFile = 'locations.txt',
@@ -80,42 +81,41 @@ param (
 )
 
 function Get-LocationCode {
-	param (
-		[parameter(Mandatory=$True)]
-			[ValidateNotNullOrEmpty()]
-			[string] $GatewayIPAddress,
-		[parameter(Mandatory=$False)]
-			[string] $DataFile = $LocationFile
+    param (
+        [parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
+        [string] $GatewayIPAddress,
+        [parameter(Mandatory=$False)]
+        [string] $DataFile = $LocationFile
     )
     <# format of location data is as follows:
     IPADDRESS=FULLNAME,ABBREV
     10.0.0.1=NEWYORK,NYC
     #>
-	if (!(Test-Path -Path $DataFile)) {
-		# failed to load data file
-		Write-Verbose "data file not found: $DataFile"
-		Write-Output ""
-		break
-	}
-	$shortname = ""
-  $dataset = Get-Content -Path $DataFile
-  if ($dataset.length -gt 0) {
-    Write-Verbose "data loaded from text file"
-  }
-	foreach ($row in $dataset) {
-		$rowdata = $row -split '='
-    $gateway = $rowdata[0]
-    if ($gateway -eq $GatewayIPAddress) {
-      $location  = $rowdata[1]
-      $fullname  = ($location -split ',')[0]
-      $shortname = ($location -split ',')[1]
-      Write-Verbose "location: $fullname"
-      Write-Verbose "shortname: $shortname"
-      break
+    if (!(Test-Path -Path $DataFile)) {
+        Write-Verbose "data file not found: $DataFile"
+        Write-Output ""
+        break
     }
-  }
-	Write-Verbose "location code is: $shortname"
-	Write-Output $shortname
+    $shortname = ""
+    $dataset = Get-Content -Path $DataFile
+    if ($dataset.length -gt 0) {
+        Write-Verbose "data loaded from text file"
+    }
+    foreach ($row in $dataset) {
+        $rowdata = $row -split '='
+        $gateway = $rowdata[0]
+        if ($gateway -eq $GatewayIPAddress) {
+            $location  = $rowdata[1]
+            $fullname  = ($location -split ',')[0]
+            $shortname = ($location -split ',')[1]
+            Write-Verbose "location: $fullname"
+            Write-Verbose "shortname: $shortname"
+            break
+        }
+    }
+    Write-Verbose "location code is: $shortname"
+    Write-Output $shortname
 }
 
 function Get-ComputerNameInput {
@@ -246,11 +246,19 @@ elseif ($computername.Length -gt 15) {
     Write-Output "requested name is longer than maximum of 15 characters"
     break
 }
+else {
+    $badChars = "~/^\*<>|?:"
+    $computername.ToCharArray() | Foreach-Object { if($badChars.ToCharArray() -contains $_) {$badname = $True} }
+    if ($badname) {
+        Write-Output "$computername contains invalid characters"
+        break
+    }
+}
 Write-Verbose "computer name is $computername"
 
 if (!$Testing) {
     Write-Verbose "assigning task sequence variables"
-    $tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment
+    $tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment 
     $tsenv.Value("OSDComputername") = $computername 
 }
 else { 
