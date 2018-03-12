@@ -3,25 +3,20 @@
 
 #This is the switch parameter for running this script as a 'silent' script, for use in MDT images or any type of mass deployment without user interaction.
 param (
-	[switch] $Debloat,
-	[switch] $SysPrep,
-	[switch] $StopEdgePDF
+    [switch] $Debloat,
+    [switch] $SysPrep,
+    [switch] $StopEdgePDF
 )
 #This will run get-appxpackage | remove-appxpackage which is required for sysprep to provision the apps.
 Function Begin-SysPrep {
-
     param([switch]$SysPrep)
-
-    get-appxpackage | remove-appxpackage -ErrorAction SilentlyContinue
-
+    Get-AppxPackage | Remove-AppxPackage -ErrorAction SilentlyContinue
 }
 
 #Creates a PSDrive to be able to access the 'HKCR' tree
 New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
 Function Start-Debloat {
-    
     param([switch]$Debloat)
-
     #Removes AppxPackages
     #Credit to Reddit user /u/GavinEke for a modified version of my whitelist code
     [regex]$WhitelistedApps = 'Microsoft.Paint3D|Microsoft.WindowsCalculator|Microsoft.WindowsStore|Microsoft.Windows.Photos|CanonicalGroupLimited.UbuntuonWindows'
@@ -30,11 +25,8 @@ Function Start-Debloat {
 }
 
 Function Remove-Keys {
-        
-    Param([switch]$Debloat)    
-    
+    param([switch]$Debloat)    
     #These are the registry keys that it will delete.
-        
     $Keys = @(
         
         #Remove Background Tasks
@@ -76,8 +68,7 @@ Function Remove-Keys {
 }
         
 Function Protect-Privacy {
-    
-    Param([switch]$Debloat)    
+    param([switch]$Debloat)    
 
     #Creates a PSDrive to be able to access the 'HKCR' tree
     New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
@@ -170,9 +161,7 @@ Function Protect-Privacy {
 }
     
 Function Stop-EdgePDF {
-
     param([switch]$StopEdgePDF)    
-    
     #Stops edge from taking over as the default .PDF viewer
     Write-Output "Stopping Edge from taking over as the default .PDF viewer" 
     $NoOpen = 'HKCR:\.pdf'
@@ -213,16 +202,14 @@ Function Stop-EdgePDF {
 }
 
 Function FixWhitelistedApps {
-    
-    Param([switch]$Debloat)
-    
+    param([switch]$Debloat)
     If(!(Get-AppxPackage -AllUsers | Select Microsoft.Paint3D, Microsoft.WindowsCalculator, Microsoft.WindowsStore, Microsoft.Windows.Photos)) {
     
     #Credit to abulgatz for the 4 lines of code
-    Get-AppxPackage -allusers Microsoft.Paint3D | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
-    Get-AppxPackage -allusers Microsoft.WindowsCalculator | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
-    Get-AppxPackage -allusers Microsoft.WindowsStore | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
-    Get-AppxPackage -allusers Microsoft.Windows.Photos | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"} } 
+    Get-AppxPackage -AllUsers Microsoft.Paint3D | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+    Get-AppxPackage -AllUsers Microsoft.WindowsCalculator | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+    Get-AppxPackage -AllUsers Microsoft.WindowsStore | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+    Get-AppxPackage -AllUsers Microsoft.Windows.Photos | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"} } 
 }
 
 Write-Output "Initiating Sysprep"
