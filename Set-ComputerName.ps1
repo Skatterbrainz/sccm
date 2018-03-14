@@ -54,7 +54,8 @@ to ensure it meets standard form used in your environment. Addtional form object
 task sequence variables for. Also as a simple example, I just added the xaml for the wpf form as a variable in the script. You have the option of storing it in     
 a external file if your form gets complex.  
 
-Version 1.0 03/08/2018 - David Stein
+Version 1.0 - 03/08/2018 - David Stein
+Version 1.1 - 03/13/2018 - David Stein - Added form size options as param inputs
  
 The GUI form aspects are directly adapted from the outstanding work of Jonathan Warnken:
 Jonathan Warnken - jon.warnken@gmail.com 
@@ -77,7 +78,17 @@ param (
     [parameter(Mandatory=$False, HelpMessage="Maximum serial number length")]
         [int] $SnMaxLen = 8,
     [parameter(Mandatory=$False, HelpMessage="Prompt for full device name")]
-        [switch] $Interactive
+        [switch] $Interactive,
+    [parameter(Mandatory=$False, HelpMessage="Form Height when using Interactive param")]
+        [string] $FormHeight = '150',
+    [parameter(Mandatory=$False, HelpMessage="Form Width when using Interactive param")]
+        [string] $FormWidth = '220',
+    [parameter(Mandatory=$False, HelpMessage="Form Caption label when using Interactive param")]
+        [string] $FormCaption = 'Computer Name',
+    [parameter(Mandatory=$False, HelpMessage="Form Message text when using Inteactive param")]
+        [string] $FormMessage = 'New Name',
+    [parameter(Mandatory=$False, HelpMessage="Form Textbox width when using Interactive param")]
+        [string] $TextBoxSize = '150'
 )
 
 function Get-LocationCode {
@@ -85,6 +96,8 @@ function Get-LocationCode {
         [parameter(Mandatory=$True)]
         [ValidateNotNullOrEmpty()]
         [string] $GatewayIPAddress,
+        [parameter(Mandatory=$False)]
+        [string] $DefaultLoc = "",
         [parameter(Mandatory=$False)]
         [string] $DataFile = $LocationFile
     )
@@ -114,32 +127,43 @@ function Get-LocationCode {
             break
         }
     }
+    if ($shortname -eq "") { $shortname = $DefaultLoc }
     Write-Verbose "location code is: $shortname"
     Write-Output $shortname
 }
 
 function Get-ComputerNameInput {
     param (
-        [parameter(Mandatory=$False, HelpMessage="Default computer name")]
-        [string] $DefaultName = ""
+        [parameter(Mandatory=$False, HelpMessage="Default computer name")] [string] $DefaultDeviceName = "",
+        [parameter(Mandatory=$False)] [string] $FormTitle   = 'New Computer Name',
+        [parameter(Mandatory=$False)] [string] $FormPrompt  = 'New Name',
+        [parameter(Mandatory=$False)] [string] $FormHeight  = '154',
+        [parameter(Mandatory=$False)] [string] $FormWidth   = '425',
+        [parameter(Mandatory=$False)] [string] $TextBoxSize = '220'
     )
     [xml]$XAML = @' 
 <Window 
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-        Title="New Computer Name" Height="154" Width="425" Topmost="True" WindowStyle="ToolWindow"> 
+        Title="TITLE" Height="200" Width="500" Topmost="True" WindowStyle="ToolWindow"> 
     <Grid> 
-        <Label Name="Computername_label" Content="New Name:" HorizontalAlignment="Left" Height="27" Margin="0,10,0,0" VerticalAlignment="Top" Width="241"/> 
+        <Label Name="Computername_label" Content="PROMPT" HorizontalAlignment="Left" Height="27" Margin="0,10,0,0" VerticalAlignment="Top" Width="241"/> 
         <TextBox Name="Computername_text" HorizontalAlignment="Left" Height="27" Margin="146,10,0,0" TextWrapping="Wrap" Text=" " VerticalAlignment="Top" Width="220"/> 
         <Button Name="Continue_button" Content="Continue" HorizontalAlignment="Left" Margin="201,62,0,0" VerticalAlignment="Top" Width="75"/> 
     </Grid> 
 </Window> 
 '@ 
+    $XAML.Window.Height = $FormHeight
+    $XAML.Window.Width  = $FormWidth
+    $XAML.Window.Title  = $FormTitle
+    $XAML.Window.Grid.Label.Content = $FormPrompt
+    $XAML.Window.Grid.TextBox.Width = $TextBoxSize
+    $XAML.Window.Grid.TextBox.Text  = $DefaultDeviceName
     [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework') 
     $reader = (New-Object System.Xml.XmlNodeReader $xaml)  
     $Form = [Windows.Markup.XamlReader]::Load( $reader ) 
     $xaml.SelectNodes("//*[@Name]") | Foreach-Object {Set-Variable -Name ($_.Name) -Value $Form.FindName($_.Name)} 
-    $Computername_text.Text = $DefaultName
+    #$Computername_text.Text = $DefaultDeviceName
     $Continue_button.add_Click({ 
         $Script:NewName = $Computername_text.Text.ToString()
         $Form.Close() 
@@ -155,8 +179,14 @@ function Get-ComputerNameInput {
         }
     })
     $Computername_text.Focus() | Out-Null
-    $Form.ShowDialog() | Out-Null 
-    Write-Output ($Script:NewName).trim()
+    $Form.ShowDialog() | Out-Null
+    $result = $Script:NewName
+    if ($result -and ($result.length -gt 1)) {
+        Write-Output $result.Trim()
+    }
+    else {
+        Write-Output ""
+    }
 }
 
 function Get-FormFactorCode {
@@ -208,14 +238,14 @@ if ($Interactive) {
         $tsui = New-Object -COMObject Microsoft.SMS.TSProgressUI
         $tsui.CloseProgressDialog() 
     }
-    $computername = Get-ComputerNameInput -DefaultName $DefaultName
+    $computername = Get-ComputerNameInput -DefaultDeviceName $DefaultName
 }
 else {
     $csn = Get-SerialNumber -MaxLen $SnMaxLen
     $cff = Get-FormFactorCode
     if ($UseLocation) {
         $gwa = Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $True} | Select-Object -ExpandProperty DefaultIPGateway
-        $loc = Get-LocationCode -GatewayIPAddress $gwa -DataFile $LocationFile
+        $loc = Get-LocationCode -GatewayIPAddress $gwa -DataFile $LocationFile -DefaultLoc $DefaultLocation
     }
     else {
         $loc = ""
