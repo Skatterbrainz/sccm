@@ -211,7 +211,26 @@ function Get-FormFactorCode {
         14 { $ff = 'L'; break }
         15 { $ff = 'D'; break }
         16 { $ff = 'D'; break }
+		17 { $ff = 'D'; break }
+		18 { $ff = 'D'; break }
+		19 { $ff = 'D'; break }
+		20 { $ff = 'D'; break }
+		21 { $ff = 'D'; break }
+		22 { $ff = 'D'; break }
+		23 { $ff = 'D'; break }
+		24 { $ff = 'D'; break }
+		25 { $ff = 'D'; break }
+		26 { $ff = 'D'; break }
+		27 { $ff = 'D'; break }
+		28 { $ff = 'D'; break }
+		29 { $ff = 'D'; break }
+		30 { $ff = 'D'; break }
         31 { $ff = 'L'; break }
+		32 { $ff = 'L', break }
+		33 { $ff = 'L', break }
+		34 { $ff = 'D', break }
+		35 { $ff = 'D', break }
+		36 { $ff = 'L', break }
         default { $ff = 'X'; break }
     }
     Write-Verbose "form factor code: $ff"
