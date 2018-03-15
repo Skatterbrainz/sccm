@@ -226,11 +226,11 @@ function Get-FormFactorCode {
 		29 { $ff = 'D'; break }
 		30 { $ff = 'D'; break }
         31 { $ff = 'L'; break }
-		32 { $ff = 'L', break }
-		33 { $ff = 'L', break }
-		34 { $ff = 'D', break }
-		35 { $ff = 'D', break }
-		36 { $ff = 'L', break }
+		32 { $ff = 'L'; break }
+		33 { $ff = 'L'; break }
+		34 { $ff = 'D'; break }
+		35 { $ff = 'D'; break }
+		36 { $ff = 'L'; break }
         default { $ff = 'X'; break }
     }
     Write-Verbose "form factor code: $ff"
