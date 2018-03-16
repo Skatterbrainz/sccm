@@ -33,6 +33,21 @@ Default is 8
 .PARAMETER Interactive
 Prompt for name input using GUI form
 
+.PARAMETER FormHeight
+Form Width when using Interactive param. Default is 150
+
+.PARAMETER FormWidth
+Form Caption label when using Interactive param. Default is 220
+
+.PARAMETER FormCaption
+Form Message text when using Inteactive param. Default is 'Computer Name'
+
+.PARAMETER FormMessage
+Form Textbox width when using Interactive param. Default is 'New Name'
+
+.PARAMETER TextBoxSize
+Form text box width when using Interactive param. Default is 150
+
 .EXAMPLE 
 powershell -ExecutionPolicy Bypass -File .\Set-ComputerName.ps1 -Testing
  
@@ -47,6 +62,9 @@ powershell -File .\Set-ComputerName.ps1 -UseHyphens
 
 .EXAMPLE
 powershell -File .\Set-ComputerName.ps1 -Interactive -DefaultName "DT001"
+
+.EXAMPLE
+powershell -File .\Set-ComputerName.ps1 -Interactive -FormHeight 200 -FormWidth 500 -TextBoxSize 100 -FormMessage "Enter Name"
  
 .NOTES 
 This is a very simple version of a OSD prompt for a computername. You can add extra validation to the computer name, for example a regular expression test  
@@ -56,6 +74,7 @@ a external file if your form gets complex.
 
 Version 1.0 - 03/08/2018 - David Stein
 Version 1.1 - 03/13/2018 - David Stein - Added form size options as param inputs
+Version 1.2 - 03/16/2018 - David Stein - Bug fixes in Get-FormFactorCode. Minor formatting updates
  
 The GUI form aspects are directly adapted from the outstanding work of Jonathan Warnken:
 Jonathan Warnken - jon.warnken@gmail.com 
@@ -69,6 +88,8 @@ param (
         [string] $DefaultName = "",
     [parameter(Mandatory=$False, HelpMessage="Use location code in name")]
         [switch] $UseLocation,
+	[parameter(Mandatory=$False, HelpMessage="Do Not use form factor code in name")]
+		[switch] $SkipFormFactor,
     [parameter(Mandatory=$False, HelpMessage="Default location code")]
         [string] $DefaultLocation = "",
     [parameter(Mandatory=$False, HelpMessage="Location codes table file")]
@@ -76,6 +97,7 @@ param (
     [parameter(Mandatory=$False, HelpMessage="Concatenate name using hyphen characters")]
         [switch] $UseHyphens,
     [parameter(Mandatory=$False, HelpMessage="Maximum serial number length")]
+		[ValidateRange(1,15)]
         [int] $SnMaxLen = 8,
     [parameter(Mandatory=$False, HelpMessage="Prompt for full device name")]
         [switch] $Interactive,
@@ -93,12 +115,12 @@ param (
 
 function Get-LocationCode {
     param (
-        [parameter(Mandatory=$True)]
+        [parameter(Mandatory=$True, HelpMessage="Gateway IPv4 Address")]
         [ValidateNotNullOrEmpty()]
         [string] $GatewayIPAddress,
-        [parameter(Mandatory=$False)]
+        [parameter(Mandatory=$False, HelpMessage="Default Location Code")]
         [string] $DefaultLoc = "",
-        [parameter(Mandatory=$False)]
+        [parameter(Mandatory=$False, HelpMessage="Path to Location codes text file")]
         [string] $DataFile = $LocationFile
     )
     <# format of location data is as follows:
@@ -135,11 +157,11 @@ function Get-LocationCode {
 function Get-ComputerNameInput {
     param (
         [parameter(Mandatory=$False, HelpMessage="Default computer name")] [string] $DefaultDeviceName = "",
-        [parameter(Mandatory=$False)] [string] $FormTitle   = 'New Computer Name',
-        [parameter(Mandatory=$False)] [string] $FormPrompt  = 'New Name',
-        [parameter(Mandatory=$False)] [string] $FormHeight  = '154',
-        [parameter(Mandatory=$False)] [string] $FormWidth   = '425',
-        [parameter(Mandatory=$False)] [string] $TextBoxSize = '220'
+        [parameter(Mandatory=$False, HelpMessage="Form Title or Caption")] [string] $FormTitle   = 'New Computer Name',
+        [parameter(Mandatory=$False, HelpMessage="Form Message")] [string] $FormPrompt  = 'New Name',
+        [parameter(Mandatory=$False, HelpMessage="Form height")] [string] $FormHeight  = '154',
+        [parameter(Mandatory=$False, HelpMessage="Form Width")] [string] $FormWidth   = '425',
+        [parameter(Mandatory=$False, HelpMessage="Form Textbox width")] [string] $TextBoxSize = '220'
     )
     [xml]$XAML = @' 
 <Window 
@@ -211,26 +233,26 @@ function Get-FormFactorCode {
         14 { $ff = 'L'; break }
         15 { $ff = 'D'; break }
         16 { $ff = 'D'; break }
-		17 { $ff = 'D'; break }
-		18 { $ff = 'D'; break }
-		19 { $ff = 'D'; break }
-		20 { $ff = 'D'; break }
-		21 { $ff = 'D'; break }
-		22 { $ff = 'D'; break }
-		23 { $ff = 'D'; break }
-		24 { $ff = 'D'; break }
-		25 { $ff = 'D'; break }
-		26 { $ff = 'D'; break }
-		27 { $ff = 'D'; break }
-		28 { $ff = 'D'; break }
-		29 { $ff = 'D'; break }
-		30 { $ff = 'D'; break }
+        17 { $ff = 'D'; break }
+        18 { $ff = 'D'; break }
+        19 { $ff = 'D'; break }
+        20 { $ff = 'D'; break }
+        21 { $ff = 'D'; break }
+        22 { $ff = 'D'; break }
+        23 { $ff = 'D'; break }
+        24 { $ff = 'D'; break }
+        25 { $ff = 'D'; break }
+        26 { $ff = 'D'; break }
+        27 { $ff = 'D'; break }
+        28 { $ff = 'D'; break }
+        29 { $ff = 'D'; break }
+        30 { $ff = 'D'; break }
         31 { $ff = 'L'; break }
-		32 { $ff = 'L'; break }
-		33 { $ff = 'L'; break }
-		34 { $ff = 'D'; break }
-		35 { $ff = 'D'; break }
-		36 { $ff = 'L'; break }
+        32 { $ff = 'L'; break }
+        33 { $ff = 'L'; break }
+        34 { $ff = 'D'; break }
+        35 { $ff = 'D'; break }
+        36 { $ff = 'L'; break }
         default { $ff = 'X'; break }
     }
     Write-Verbose "form factor code: $ff"
@@ -240,6 +262,7 @@ function Get-FormFactorCode {
 function Get-SerialNumber {
     param (
         [parameter(Mandatory=$True, HelpMessage="Max length of serial number value")]
+		[ValidateNotNullOrEmpty()]
         [int] $MaxLen
     )
     $csn = Get-WmiObject -Class Win32_SystemEnclosure | Select-Object -ExpandProperty SerialNumber
@@ -261,7 +284,12 @@ if ($Interactive) {
 }
 else {
     $csn = Get-SerialNumber -MaxLen $SnMaxLen
-    $cff = Get-FormFactorCode
+	if (!($SkipFormFactor)) {
+		$cff = Get-FormFactorCode
+	}
+	else {
+		$cff = ""
+	}
     if ($UseLocation) {
         $gwa = Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $True} | Select-Object -ExpandProperty DefaultIPGateway
         $loc = Get-LocationCode -GatewayIPAddress $gwa -DataFile $LocationFile -DefaultLoc $DefaultLocation
@@ -271,10 +299,20 @@ else {
     }
     if ($UseHyphens) {
         if ($loc -ne "") {
-            $computername = $loc+'-'+$cff+'-'+$csn
+			if ($cff -ne "") {
+				$computername = $loc+'-'+$cff+'-'+$csn
+			}
+			else {
+				$computername = $loc+'-'+$csn
+			}
         }
         else {
-            $computername = $cff+'-'+$csn
+			if ($cff -ne "") {
+				$computername = $cff+'-'+$csn
+			}
+			else {
+				$computername = $csn
+			}
         }
     }
     else {
@@ -307,8 +345,14 @@ Write-Verbose "computer name is $computername"
 
 if (!$Testing) {
     Write-Verbose "assigning task sequence variables"
-    $tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment 
-    $tsenv.Value("OSDComputername") = $computername 
+    try {
+	    $tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment 
+        $tsenv.Value("OSDComputername") = $computername 
+		Write-Output "OSDComputerName set to $computername"
+	}
+	catch {
+	    Write-Output $_.Exception.Message
+	}
 }
 else { 
     Write-Output "OSDComputername would be set to $computername"
