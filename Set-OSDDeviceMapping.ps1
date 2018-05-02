@@ -22,19 +22,19 @@
     no defaults are set, use selects all options
 
 .EXAMPLE
-    Set-OSDDeviceMapping.ps1 -DefaultLocation "ALC"
+    Set-OSDDeviceMapping.ps1 -DefaultLocation "NYC"
     
-    location list is set to "ALC" as the default
+    location list is set to "NYC" as the default
 
 .EXAMPLE
-    Set-OSDDeviceMapping.ps1 -DefaultLocation "ALC" -DefaultDept "GIS"
+    Set-OSDDeviceMapping.ps1 -DefaultLocation "NYC" -DefaultDept "MKT"
     
-    location list is set to "ALC" as the default, department list is set to "GIS" as the default
+    location list is set to "NYC" as the default, department list is set to "MKT" as the default
 
 .EXAMPLE
-    Set-OSDDeviceMapping.ps1 -ForcedGateway "10.0.3.1" -DefaultLocation "ALC" -DefaultDept "GIS"
+    Set-OSDDeviceMapping.ps1 -ForcedGateway "10.0.0.1" -DefaultLocation "NYC" -DefaultDept "MKT"
     
-    location list is set to site which matches 10.0.3.1, and sets department list is set to "GIS" as the default
+    location list is set to site which matches 10.0.0.1, and sets department list is set to "MKT" as the default
 
 .NOTES
     1.0 - 05/01/2018 - DS
@@ -359,7 +359,7 @@ $DevName = Get-DeviceName -LocationsList $LocList -DepartmentsList $DeptList -De
 Write-Verbose "form closed. collecting user inputs"
 
 if (('000','001','002').Contains($Script:Location)) {
-    Write-Verbose "regional managers set to form type: Laptops"
+    Write-Verbose "forced override for form factor: Laptops"
     $FormType = "Laptops"
     $FormCode = $FormType.substring(0,1)
     Write-Verbose "override form code: $FormCode"
