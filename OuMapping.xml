@@ -1,0 +1,11 @@
+<locations path="DC=contoso,DC=local">
+	<location name="ALL" fullname="ALL" path="" comment="list all possible department codes">
+		<departments>
+			<department name="ACC" path="" comment="Accounting" />
+			<department name="LEG" path="" comment="Legal" />
+			<department name="SAL" path="" comment="Sales" />
+    </departments>
+  </location>
+  <location name="NYC" fullname="NewYork" path="OU=NewYork" comment="New York office OU">
+  </location>
+</locations>
