@@ -1,57 +1,105 @@
 <#
 .SYNOPSIS
-    Deletes computer from SCCM and AD
-.DESCRIPTION
-    Queries AD & SCCM, deletes the computer account from AD, and removes the computer object from SCCM 
-.NOTES
-    Author: Jonathan - jon@elderec.org 
-	Modified by David Stein, 5/1/2018
-.LINK 
-    http://elderec.org
-.PARAMETER ComputerName
-	Name of computer to delete from AD/SCCM
-.PARAMETER sccmServer
-	Name of the SCCM server to use
-.PARAMETER sccmSite
-	Name of the SCCM site to use
-.EXAMPLE
-	.\Remove-AdCmComputer.ps1 -ComputerName LAPTOP123
-	.\Remove-AdCmComputer.ps1 -ComputerName LAPTOP123 -SccmServer sccm.contoso.com
-	.\Remove-AdCmComputer.ps1 -ComputerName LAPTOP123 -SccmServer sccm.contoso.comm -SccmSite NPL
-#> 
+    Deletes computers from AD and ConfigMgr
 
+.DESCRIPTION
+    Deletes computers from AD domain and ConfigMgr site using explicit input or file input
+
+.PARAMETER InputFile
+    Name of TXT file with computer names to process. Overrides -ComputerName
+
+.PARAMETER ComputerName
+    Explicit computer names to process
+
+.NOTES
+    2018-05-05 - DS - first time getting drunk
+    2018-07-05 - DS - added DeleteFrom parameter, no drinking this time
+    2018-08-31 - DS - added whatif support, still sober
+
+.EXAMPLE
+    .\Remove-AdCmComputer.ps1 -ComputerName DT001 -SiteServer cm01.contoso.local -SiteCode P01 -DeleteFrom 'CM'
+
+.EXAMPLE
+	.\Remove-AdCmComputer.ps1 -InputFile .\computers.txt -SiteServer cm01.contoso.local -SiteCode P01
+
+#> 
+[CmdletBinding(SupportsShouldProcess=$True)]
 param (
-	[parameter(Mandatory=$true, HelpMessage="Enter a computer name")][string] $ComputerName,
-	[parameter(Mandatory=$false, HelpMessage="Enter SCCM server")][string] $SccmServer='contoso.local',
-	[parameter(Mandatory=$false, HelpMessage="Enter SCCM server")][string] $SccmSite='P01'
+    [parameter(Mandatory=$True, HelpMessage="ConfigMgr Site Server FQDN")]
+        [ValidateNotNullOrEmpty()]
+        [string] $SiteServer,
+    [parameter(Mandatory=$True, HelpMessage="ConfigMgr Site Code")]
+        [ValidateLength(3,3)]
+        [string] $SiteCode,
+    [parameter(Mandatory=$False, HelpMessage="Input TXT File")]
+        [string] $InputFile = "",
+    [parameter(Mandatory=$False, HelpMessage="Computer Names")]
+        [string[]] $ComputerName = "",
+    [parameter(Mandatory=$False, HelpMessage="Delete from AD or ConfigMgr or Both")]
+        [ValidateSet('BOTH','AD','CM')]
+        [string] $DeleteFrom = 'BOTH'
 )
 
+$time1 = Get-Date
 # find and delete the computer from AD
-$dom  = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
-$root = $dom.GetDirectoryEntry()
+$domain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+$root   = $domain.GetDirectoryEntry()
 $search = [System.DirectoryServices.DirectorySearcher]$root
-$search.Filter = "(&(objectClass=computer)(name=$ComputerName))"
-$results = $search.FindAll()
-if ($results.Count -gt 0) {
-    try {
-        $results | ForEach-Object {$_.GetDirectoryEntry() } | ForEach-Object {$_.DeleteObject(0)}
-        Write-Host "$ComputerName deleted from Active Directory domain"
-    }
-    catch {
-        Write-Host "$ComputerName could not be deleted from Active Directory domain"
-    }
-}
-else {
-    Write-Host "$ComputerName not found in Active Directory domain"
-}
+$forest = ([System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()).Forest.Name
 
-# find and delete from SCCM
-try {
-	$comp = Get-WmiObject -query "select * from SMS_R_SYSTEM WHERE Name='$computerName'" -computername $sccmServer -namespace "ROOT\SMS\site_$sccmSite"
-	$comp.psbase.Delete()
-	# spit out results
-	Write-Host "Deleted $computerName from AD. Removed $computerName from SCCM server $sccmServer, site $sccmSite"
+if (![string]::IsNullOrEmpty($InputFile)) {
+    if (Test-Path $InputFile) {
+        $ComputerName = Get-Content $InputFile
+    }
+    else {
+        Write-Warning "ABORT: Input file not found: $InputFile"
+        break
+    }
 }
-catch {
-	Write-Host "$ComputerName not found in SCCM database"
+foreach ($Computer in $ComputerName) {
+    if ($DeleteFrom -eq 'AD' -or $DeleteFrom -eq 'BOTH') {
+        Write-Verbose "searching domain for: $Computer"
+        $search.Filter = "(&(objectClass=computer)(name=$Computer))"
+        try {
+            $result = $search.FindAll() | Foreach-Object {$_.GetDirectoryEntry() }
+            if ($result) {
+                if ($WhatIfPreference) {
+                    Write-Host "WHATIF: delete $Computer from $forest" -ForegroundColor Yellow
+                }
+                else {
+                    $result | Foreach-Object {$_.DeleteObject(0)}
+                    Write-Host "deleted from domain: $Computer" -ForegroundColor Cyan
+                }
+            }
+            else {
+                Write-Warning "$Computer not found in domain"
+            }
+        }
+        catch {
+            Write-Error $_.Exception.Message
+        }
+    }
+    if ($DeleteFrom -eq 'CM' -or $DeleteFrom -eq 'BOTH') {
+        try {
+            $res = Get-WmiObject -Query "select * from SMS_R_SYSTEM WHERE Name='$Computer'" -ComputerName $SiteServer -Namespace "ROOT\SMS\site_$SiteCode"
+            if ($res) {
+                if ($WhatIfPreference) {
+                    Write-Host "WHATIF: delete $Computer from $SiteServer / $SiteCode" -ForegroundColor Yellow
+                }
+                else {
+                    $res.psbase.Delete()
+                    Write-Host "deleted from sccm: $Computer" -ForegroundColor Green
+                }
+            }
+            else {
+                Write-Warning "$Computer not found in Configuration Manager site database"
+            }
+        }
+        catch {
+            Write-Error $_.Exception.Message
+        }
+    }
 }
+$time2 = Get-Date
+$tdiff = New-TimeSpan -Start $time1 -End $time2
+Write-Host "completed. runtime: $($tdiff.TotalSeconds) seconds" -ForegroundColor Cyan
