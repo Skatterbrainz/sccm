@@ -41,6 +41,7 @@ $frag | Where-Object {$_.FragPct -gt 50}
 .NOTES
 1808.30.01 - DS - First time getting drunk and passed out
 1808.31.01 - DS - Oh no. Not again?!
+1809.01 - DS - OutputFile and progress bar stuff added
 
 #>
 
@@ -57,11 +58,35 @@ param (
         [string] $QueryName = "",
     [parameter(Mandatory=$False, HelpMessage="Prompt for Selected Queries")]
         [switch] $Interactive,
+    [parameter(Mandatory=$False, HelpMessage="Output file path")]
+        [string] $OutputFile = "$SiteServer`_$SiteCode.txt",
     [parameter(Mandatory=$False)]
         [switch] $About
 )
 
-$ScriptVersion = "1808.31.1"
+$ScriptVersion = "1809.01"
+$PbCaption = "ConfigMgr Site Assessment"
+
+function Write-Custom {
+    param (
+        [parameter(Mandatory=$True, HelpMessage="Caption for progress bar")]
+            [ValidateNotNullOrEmpty()]
+            [string] $Caption,
+        [parameter(Mandatory=$True, HelpMessage="Task for progress bar and output file")]
+            [ValidateNotNullOrEmpty()]
+            [string] $TaskName,
+        [parameter(Mandatory=$True, HelpMessage="Percent complete (0 to 100)")]
+            [ValidateRange(0,100)]
+            [int] $Percent,
+        [parameter(Mandatory=$False, HelpMessage="Output file path")]
+            [string] $LogFile = ""
+    )
+    Write-Progress -Activity $Caption -Status $TaskName -PercentComplete $Percent
+    if ($LogFile -ne "") {
+        "*** $($TaskName.ToUpper()) ***" | Out-File $LogFile -Append
+    }
+}
+
 if ([string]::IsNullOrEmpty($SiteCode)) {
     try {
         $key = Get-Item -Path "HKLM:SOFTWARE\Microsoft\CCM\CcmEval" -ErrorAction SilentlyContinue
@@ -91,10 +116,15 @@ Write-Verbose "site code....... $SiteCode"
 Write-Verbose "configfile...... $ConfigFile"
 Write-Verbose "queryname....... $QueryName"
 
+Write-Output "context: $($env:USERNAME).$($env:USERDNSDOMAIN)" | Out-File $OutputFile
+Write-Output "hostname: $($env:COMPUTERNAME)" | Out-File $OutputFile -Append
+Write-Output "version: $ScriptVersion" | Out-File $OutputFile -Append
+
 if (!(Test-Path $ConfigFile)) {
     Write-Warning "ABORT: configuration file not found: $ConfigFile"
     break
 }
+Write-Custom -Caption $PbCaption -TaskName "Loading queries" -Percent 1
 Write-Verbose "loading queries from: $ConfigFile"
 [xml]$queryset = Get-Content $ConfigFile
 if (!([string]::IsNullOrEmpty($QueryName))) {
@@ -117,12 +147,17 @@ else {
     Write-Verbose "all queries selected (default)"
     $qset = $queryset.queries.query
 }
-Write-Verbose "user context: $($env:USERNAME+'.'+$env:USERDNSDOMAIN)"
+
+Write-Custom -Caption $PbCaption -TaskName "Preparing" -Percent 10
+Write-Output "user context: $($env:USERNAME+'.'+$env:USERDNSDOMAIN)" | Out-File $OutputFile -Append
+
 $cs = "Server=$SiteServer;Database=CM_$SiteCode;Integrated Security=True;"
 Write-Verbose "connection string: $cs"
 $connection = New-Object System.Data.SqlClient.SqlConnection
 $connection.ConnectionString = $cs
-Write-Verbose "opening sql server connection"
+
+Write-Custom -Caption $PbCaption -TaskName "Connecting to SQL Server" -Percent 20
+#Write-Verbose "opening sql server connection"
 try {
     $connection.Open()
     Write-Verbose "connection opened successfully"
@@ -133,24 +168,34 @@ catch {
 }
 $command = $connection.CreateCommand()
 Write-Verbose "processing queries"
+
+$qty = $qset.Count
+$idx = 1
 foreach ($query in $qset) {
     $table = $null
     $queryName = $query.name
     Write-Verbose "query: $queryName"
     Write-Verbose "expression: $($query.exp)"
+    Write-Verbose "index number: $idx of $pct"
+    $pct = ([math]::Round($idx/$qty,2)*100)
+    Write-Custom -Caption $PbCaption -TaskName "[$idx of $qty] $queryName" -Percent $pct -LogFile $OutputFile
     $command.CommandText = $query.exp
     try {
         $result = $command.ExecuteReader()
         $table = New-Object System.Data.DataTable
         $table.Load($result)
-        Write-Output $table
+        Write-Output $table | Out-File $OutputFile -Append
     }
     catch {
-        Write-Verbose "null recordset ***"
+        Write-Output "null recordset" | Out-File $OutputFile -Append
+        #Write-Verbose "null recordset ***"
     }
+    $idx++
 } # foreach
 $connection.Close()
+Write-Custom -Caption $PbCaption -TaskName "Closing Connection" -Percent 95
 Write-Verbose "connection closed"
 $time2 = Get-Date
 $timex = New-TimeSpan -Start $time1 -End $time2
+Write-Custom -Caption $PbCaption -TaskName "Completed" -Percent 100
 Write-Verbose "runtime: $($timex.TotalSeconds) seconds"
