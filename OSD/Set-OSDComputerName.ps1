@@ -72,6 +72,10 @@ Device name will be like "N12345678" or "W12345678"
 .\Set-OSDComputerName.ps1 -Template "[DIRECT]" -ForcedTruncate -MaxNameLength 10 -Verbose
 Device name will be whatever is entered in the dialog form, up to 10-chars
 
+.EXAMPLE
+.\Set-OSDComputerName.ps1 -Template "[DIRECT]-[SERIAL]" -MaxFormInput 3 -DefaultDirect "NYC" -Verbose
+Device name will be 3-chars from form input with last part of SERIAL up to 15 chars total with a hyphen: "NYC-12345678901"
+
 .NOTES
 Version 0.1 - 20180812 - DS - Initial release
 Version 0.2 - 20180913 - DS - Updated for DIRECT+suffix and right-truncate on SERIAL
@@ -94,9 +98,9 @@ param (
         [string] $DefaultDirect = "",
     [parameter(Mandatory=$False, HelpMessage = "Explicit IP Gateway Address")]
         [string] $ForcedGateway = "",
-	[parameter(Mandatory=$False, HelpMessage = "Custom Dialog Caption")]
-		[ValidateNotNullOrEmpty()]
-		[string] $DialogCaption = "Device Name",
+    [parameter(Mandatory=$False, HelpMessage = "Custom Dialog Caption")]
+        [ValidateNotNullOrEmpty()]
+        [string] $DialogCaption = "Device Name",
     [parameter(Mandatory=$False, HelpMessage = "Force Truncate Name Lengths if Required")]
         [switch] $ForcedTruncate,
     [parameter(Mandatory=$False, HelpMessage = "Do not force Upper case inputs")]
@@ -104,9 +108,9 @@ param (
     [parameter(Mandatory=$False, HelpMessage = "Maximum device name length")]
         [ValidateRange(3,15)]
         [int] $MaxNameLength = 15,
-	[parameter(Mandatory=$False, HelpMessage = "Maximum characters allowed in dialog form input")]
-		[ValidateRange(1,100)]
-		[int] $MaxFormInput = 15
+    [parameter(Mandatory=$False, HelpMessage = "Maximum characters allowed in dialog form input")]
+        [ValidateRange(1,100)]
+        [int] $MaxFormInput = 15
 )
 $LocationDataFile = ".\osd-locations.csv"
 $exitcode = 0
@@ -197,12 +201,12 @@ else {
         switch ($form) {
              8 { $ff = $LaptopCode; break }
              9 { $ff = $LaptopCode; break }
-			10 { $ff = $LaptopCode; break }
-			14 { $ff = $LaptopCode; break }
-			30 { $ff = $LaptopCode; break }
-			31 { $ff = $LaptopCode; break }
-			32 { $ff = $LaptopCode; break }
-			default { $ff = $WorkstationCode; break }
+            10 { $ff = $LaptopCode; break }
+            14 { $ff = $LaptopCode; break }
+            30 { $ff = $LaptopCode; break }
+            31 { $ff = $LaptopCode; break }
+            32 { $ff = $LaptopCode; break }
+            default { $ff = $WorkstationCode; break }
         }
         $tempName = $tempName.Replace( "[FORM]", $ff )
         Write-Verbose "form code = $ff"
@@ -211,21 +215,14 @@ else {
         Write-Verbose "template: SERIAL"
         $sn = Get-WmiObject -Class Win32_SystemEnclosure | Select-Object -ExpandProperty 'SerialNumber'
         Write-Verbose "serial number = $sn"
-        <#
-		if ($sn.Length -gt 15) {
-            Write-Verbose "truncating to first 15 characters"
-            $sn = $sn.Substring( 0, 15 )
-            Write-Verbose "serial number = $sn"
-        }
-		#>
 		$testString = $tempName.Replace( "[SERIAL]", $sn )
 		Write-Verbose "proposed name is $testString"
 		if ($testString.Length -gt $MaxNameLength) {
-			# example: length of fullname is 19 chars
+			# example: length of fullname is 19 chars with or without a hyphen
 			$over = $testString.Length - $MaxNameLength
 			Write-Verbose "proposed name is $over chars longer than max of $MaxNameLength"
-			# example: over by 4 chars
-			# get last 19 - 4 chars of sn
+			# example: proposed name is over by 4 chars
+			# example: get last (19 - 4) chars of sn
 			$newsn = $sn.Substring($over)
 			Write-Verbose "tail string is $newsn"
 			$tempName = $tempName.Replace( "[SERIAL]", $newsn )
