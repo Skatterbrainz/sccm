@@ -96,14 +96,14 @@ function New-TrackingLog {
 
 function Get-CmDeviceCollectionDelta {
     param (
-        [parameter(Mandatory=$True, HelpMessage="Device Collection name")]
+        [parameter(Mandatory=$True, HelpMessage="Device Collection1 name")]
             [ValidateNotNullOrEmpty()]
             [string] $Collection1,
-        [parameter(Mandatory=$True, HelpMessage="Device Collection name")]
+        [parameter(Mandatory=$True, HelpMessage="Device Collection2 name")]
             [ValidateNotNullOrEmpty()]
             [string] $Collection2,
-        [parameter(Mandatory=$True, HelpMessage="Device Collection name")]
-            [ValidateRange(0,1000)]
+        [parameter(Mandatory=$True, HelpMessage="Max number of resources to return")]
+            [ValidateRange(1,1000)]
             [int] $Count = 10
     )
     try {
@@ -113,25 +113,6 @@ function Get-CmDeviceCollectionDelta {
     }
     catch {
         Write-Error $_.Exception.Message
-    }
-    , $result
-}
-
-<#function Get-CMDeviceCollectionMembers {
-    param (
-        [parameter(Mandatory=$True, HelpMessage="Device Collection name")]
-            [ValidateNotNullOrEmpty()]
-            [string] $CollectionName,
-        [parameter(Mandatory=$False, HelpMessage="Limit to first X members only")]
-            [ValidateRange(1,1000)]
-            [int] $Count = 10
-    )
-    try {
-        $result = Get-CMDeviceCollectionDirectMembershipRule -CollectionName $CollectionName -ErrorAction SilentlyContinue | 
-            Select-Object -ExpandProperty RuleName -First $Count
-    }
-    catch {
-        Write-Verbose "$CollectionName has no direct rule members"
     }
     , $result
 }
