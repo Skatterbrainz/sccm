@@ -35,13 +35,25 @@ param (
 )
 $DatabaseName = "CM_$SiteCode"
 
-$query = @"
+if ($AppFilter -eq 'ALL') {
+    $query = @"
+SELECT DISTINCT dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED.ProductName0 AS ProductName, 
+dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED.ProductVersion0 AS [Version],
+dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED.Publisher0 AS Publisher,
+COUNT(*) AS Installs
+FROM dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED
+GROUP BY ProductName0, ProductVersion0, Publisher0
+"@
+}
+else {
+    $query = @"
 SELECT DISTINCT dbo.v_R_System.Name0, dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED.ProductName0, 
 dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED.ProductVersion0
 FROM dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED INNER JOIN
 dbo.v_R_System ON dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED.ResourceID = dbo.v_R_System.ResourceID
 WHERE (dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED.ProductName0 LIKE '$AppFilter')
 "@
+}
 
 Write-Verbose "query...... $query"
 Write-Verbose "server..... $ServerName"
