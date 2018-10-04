@@ -44,10 +44,10 @@ param (
         [string] $AppFilter = "Microsoft Office 365 ProPlus%",
     [parameter(Mandatory=$False, HelpMessage="ConfigMgr DB Server Name")]
         [ValidateNotNullOrEmpty()]
-        [string] $ServerName = "hcidalas37.hci.pvt",
+        [string] $ServerName = "cm01.contoso.local",
     [parameter(Mandatory=$False, HelpMessage="ConfigMgr Site Code")]
         [ValidateNotNullOrEmpty()]
-        [string] $SiteCode = "HHQ",
+        [string] $SiteCode = "P01",
     [parameter(Mandatory=$False, HelpMessage="Show Total row count only")]
         [switch] $TotalCount,
     [parameter(Mandatory=$False, HelpMessage="Show Detailed Columns")]
