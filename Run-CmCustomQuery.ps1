@@ -2,10 +2,10 @@
 param (
     [parameter(Mandatory=$False, HelpMessage="ConfigMgr DB Server Name")]
         [ValidateNotNullOrEmpty()]
-        [string] $ServerName = "hcidalas37.hci.pvt",
+        [string] $ServerName = "cm01.contoso.local",
     [parameter(Mandatory=$False, HelpMessage="ConfigMgr Site Code")]
         [ValidateNotNullOrEmpty()]
-        [string] $SiteCode = "HHQ",
+        [string] $SiteCode = "P01",
     [parameter(Mandatory=$False, HelpMessage="Path to query files")]
         [ValidateNotNullOrEmpty()]
         [string] $qpath = ".\queries"
