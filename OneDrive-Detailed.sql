@@ -3,8 +3,8 @@ SELECT DISTINCT
 	dbo.v_GS_SoftwareFile.FileName, 
 	dbo.v_GS_SoftwareFile.FileVersion, 
 	CASE 
-	WHEN (FileVersion = '18.151.0729.0012') THEN 'Current' 
-	ELSE '' END AS Status, 
+		WHEN (FileVersion = '18.151.0729.0012') THEN 'Current' 
+		ELSE '' END AS Status, 
 	dbo.v_GS_SoftwareFile.FileSize, 
 	dbo.v_GS_SoftwareFile.FilePath
 FROM 
