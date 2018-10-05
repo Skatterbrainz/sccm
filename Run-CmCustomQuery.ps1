@@ -8,11 +8,14 @@ param (
         [string] $SiteCode = "P01",
     [parameter(Mandatory=$False, HelpMessage="Path to query files")]
         [ValidateNotNullOrEmpty()]
-        [string] $qpath = ".\queries"
+        [string] $QPath = ".\queries",
+    [parameter(Mandatory=$False)]
+        [ValidateSet('Grid','Csv','Pipeline')]
+        [string] $Output = 'Grid'
 )
 $DatabaseName = "CM_$SiteCode"
 
-$qfiles = Get-ChildItem -Path $qpath -Filter "*.sql" | Sort-Object Name
+$qfiles = Get-ChildItem -Path $QPath -Filter "*.sql" | Sort-Object Name
 Write-Verbose "$($qfiles.count) files were found"
 if ($qfiles.count -lt 1) {
     Write-Warning "$qpath contains no .sql files"
@@ -32,7 +35,7 @@ if (![string]::IsNullOrEmpty($qfile)) {
     if (![string]::IsNullOrEmpty($qtext)) {
         $QueryTimeout = 120
         $ConnectionTimeout = 30
-
+        Write-Verbose "QUERY: $qtext"
         #Action of connecting to the Database and executing the query and returning results if there were any.
         $conn = New-Object System.Data.SqlClient.SQLConnection
         $ConnectionString = "Server={0};Database={1};Integrated Security=True;Connect Timeout={2}" -f $ServerName,$DatabaseName,$ConnectionTimeout
@@ -47,7 +50,19 @@ if (![string]::IsNullOrEmpty($qfile)) {
         $rowcount = $($ds.Tables).Rows.Count
         if ($rowcount -gt 0) {
             Write-Host "$rowcount rows returned" -ForegroundColor Green
-            $($ds.Tables).Rows | Out-GridView -Title "Query Results"
+            switch ($Output) {
+                'Grid' {
+                    $($ds.Tables).Rows | Out-GridView -Title "Query Results"
+                    break
+                }
+                'Csv' {
+                    $($ds.Tables).Rows | Export-Csv -NoTypeInformation -Path "$($qfile -replace '.sql','.csv')"
+                    break
+                }
+                default {
+                    $($ds.Tables).Rows
+                }
+            } # switch
         }
         else {
             Write-Host "No rows were returned" -ForegroundColor Magenta
