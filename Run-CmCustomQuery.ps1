@@ -2,10 +2,10 @@
 param (
     [parameter(Mandatory=$False, HelpMessage="ConfigMgr DB Server Name")]
         [ValidateNotNullOrEmpty()]
-        [string] $ServerName = "cm01.contoso.local",
+        [string] $ServerName = "hcidalas37.hci.pvt",
     [parameter(Mandatory=$False, HelpMessage="ConfigMgr Site Code")]
         [ValidateNotNullOrEmpty()]
-        [string] $SiteCode = "P01",
+        [string] $SiteCode = "HHQ",
     [parameter(Mandatory=$False, HelpMessage="Path to query files")]
         [ValidateNotNullOrEmpty()]
         [string] $QPath = ".\queries",
@@ -52,7 +52,7 @@ if (![string]::IsNullOrEmpty($qfile)) {
             Write-Host "$rowcount rows returned" -ForegroundColor Green
             switch ($Output) {
                 'Grid' {
-                    $($ds.Tables).Rows | Out-GridView -Title "Query Results"
+                    $($ds.Tables).Rows | Out-GridView -Title "Query Results: $($qfile -replace '.sql','')"
                     break
                 }
                 'Csv' {
