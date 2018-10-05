@@ -1,0 +1,10 @@
+SELECT DISTINCT
+	TOP 100 
+	UserName0 AS UserName,
+	COUNT(*) AS Clients
+FROM
+	dbo.v_GS_COMPUTER_SYSTEM
+GROUP BY
+	UserName0
+ORDER BY 
+	Clients DESC
