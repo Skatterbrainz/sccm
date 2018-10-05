@@ -1,0 +1,9 @@
+SELECT DISTINCT
+	DefaultIPGateway0 AS Gateway,
+	COUNT(*) AS Clients
+FROM
+	dbo.v_GS_NETWORK_ADAPTER_CONFIGURATION
+GROUP BY
+	DefaultIPGateway0
+ORDER BY 
+	DefaultIPGateway0
