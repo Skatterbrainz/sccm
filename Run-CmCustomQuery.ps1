@@ -1,3 +1,28 @@
+#Requires -Version 3
+<#
+.DESCRIPTION
+    Sneak in and read data from ConfigMgr SQL database
+.PARAMETER ServerName
+    SQL Server Hostname (FQDN)
+.PARAMETER SiteCode
+    ConfigMgr Site Code
+.PARAMETER QPath
+    Path to .sql files (default is .\queries)
+.PARAMETER Output
+    List: Grid, Csv, Pipeline
+.EXAMPLE
+    .\Run-CmCustomQuery.ps1
+.EXAMPLE
+    .\Run-CmCustomQuery.ps1 -ServerName "cm01.fabrikam.local" -SiteCode "PS1"
+.EXAMPLE
+    .\Run-CmCustomQuery.ps1 -Output Csv
+.EXAMPLE
+    .\Run-CmCustomQuery.ps1 -Output Pipeline | ?{$_.Installs -gt 50}
+.NOTES
+    0.1.0 - DS - Initial release
+    0.1.1 - DS - Documentation, Gridview title enhancement
+#>
+
 [CmdletBinding()]
 param (
     [parameter(Mandatory=$False, HelpMessage="ConfigMgr DB Server Name")]
