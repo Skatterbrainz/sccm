@@ -69,7 +69,7 @@ if((Get-PSDrive -Name $SiteCode -PSProvider CMSite -ErrorAction SilentlyContinue
 
 # Set the current location to be the site code.
 $Loc = Get-Location
-Set-Location "$($SiteCode):\" @initParams
+Push-Location "$($SiteCode):\" @initParams
 
 function Get-TrackingLog {
     param (
@@ -115,6 +115,24 @@ function Get-CmDeviceCollectionDelta {
         Write-Error $_.Exception.Message
     }
     , $result
+}
+
+Function Send-MailMessageEx {
+    param (
+        [parameter(Mandatory=$True, HelpMessage='Collection of object with ComputerName and Email properties')]
+            [ValidateNotNullOrEmpty()]
+            [string[]] $ComputerNameAndEmailList,
+        [parameter(Mandatory=$False, HelpMessage='Email Subject)]
+            [string] $EmailSubject = 'Updating Windows 10 on your computer',
+        [parameter(Mandatory=$False, HelpMessage='Email Body Header')]
+            [string] $EmailBodyHeader = 'A computer used by you will install an update for Windows 10. `Computer Name:',
+        [parameter(Mandatory=$False, HelpMessage='SMTP Mail Server')]
+            [string] $SMTPServer = 'stmp.contoso.com',
+    )
+    $Date = (get-date -f MM-dd-yyyy)
+    ForEach ($Object in $ComputerNameAndEmailList) {
+        Send-MailMessage -To $Object.email -From "<SCCMAdmin@contoso.com>" -Subject $EmailSubject -body "$(EmailBodyHeader) $(Object.ComputerName)" -SmtpServer $SMTPServer
+    }
 }
 
 Write-Verbose "begin processing"
