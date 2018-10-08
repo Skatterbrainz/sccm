@@ -21,6 +21,7 @@
 .NOTES
     0.1.0 - DS - Initial release
     0.1.1 - DS - Documentation, Gridview title enhancement
+    0.1.2 - DS - Display output path for CSV option at completion
 #>
 
 [CmdletBinding()]
@@ -81,7 +82,9 @@ if (![string]::IsNullOrEmpty($qfile)) {
                     break
                 }
                 'Csv' {
-                    $($ds.Tables).Rows | Export-Csv -NoTypeInformation -Path "$($qfile -replace '.sql','.csv')"
+                    $csvfile = "$($qfile -replace '.sql','.csv')"
+                    $($ds.Tables).Rows | Export-Csv -NoTypeInformation -Path $csvfile
+                    Write-Host "exported to: $csvfile" -ForegroundColor Green
                     break
                 }
                 default {
