@@ -1,3 +1,5 @@
+#requires -Module ConfigurationManager
+
 [CmdletBinding(SupportsShouldProcess=$True)]
 param (
     [parameter(Mandatory=$True, HelpMessage="Computer Name")]
