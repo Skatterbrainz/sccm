@@ -132,219 +132,171 @@
       49 - {0000-0000-0000-000000000223} External Event Detection 
 #> 
      
-    [CmdletBinding()] 
-   
-    Param ( 
-        [Parameter(ValueFromPipeline=$True, 
-            ValueFromPipelineByPropertyName=$True, 
-            HelpMessage='Enter the name of either one or more computers')] 
-             
-            [Alias('CN')]    
-            $ComputerName = $env:COMPUTERNAME,  
-             
-        [Parameter(ParameterSetName = 'Set 1', 
-            HelpMessage='Enter the SCCM client action numerical value')] 
-            [ValidateNotNullOrEmpty()] 
-            [ValidateRange(1,49)] 
-            [Alias('SCA')]    
-            [Int]$SCCMClientAction, 
- 
-        [Parameter(ParameterSetName = 'Set 2', 
-            HelpMessage='Use this switch parameter to run the following 3 SCCM client actions: Machine Policy Retrieval & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle')] 
-            [Alias('SAB')]    
-            [Switch]$SCCMActionsBundle 
-    ) 
-     
-    Begin { 
-        $NewLine = "`r`n" 
- 
-        If ($ComputerName -eq $env:COMPUTERNAME) {    
-            $ComputerVar = $ComputerName.ToUpper() 
+[CmdletBinding()] 
+param ( 
+    [parameter(ValueFromPipeline=$True, 
+        ValueFromPipelineByPropertyName=$True, 
+        HelpMessage='Enter the name of either one or more computers')] 
+
+        [Alias('CN')]    
+        $ComputerName = $env:COMPUTERNAME,  
+
+    [parameter(ParameterSetName = 'Set 1', 
+        HelpMessage='Enter the SCCM client action numerical value')] 
+        [ValidateNotNullOrEmpty()] 
+        [ValidateRange(1,49)] 
+        [Alias('SCA')]    
+        [Int]$SCCMClientAction, 
+
+    [parameter(ParameterSetName = 'Set 2', 
+        HelpMessage='Use this switch parameter to run the following 3 SCCM client actions: Machine Policy Retrieval & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle')] 
+        [Alias('SAB')]    
+        [Switch]$SCCMActionsBundle 
+) 
+
+Begin { 
+    $NewLine = "`r`n" 
+
+    If ($ComputerName -eq $env:COMPUTERNAME) {    
+        $ComputerVar = $ComputerName.ToUpper() 
+    }
+    Else { 
+        Write-Verbose "=======================================================" 
+        Write-Verbose "            Check Computer(s) Online Status            " 
+        Write-Verbose "=======================================================" 
+
+        $ComputerOnlineStatus = Foreach ($Computer in $ComputerName) { 
+            $Online  = @(ForEach-Object -Process { If (Test-Connection -ComputerName $Computer -Count '1' -Quiet) { $Computer } }) 
+            $Offline = @(ForEach-Object -Process { If (!(Test-Connection -ComputerName $Computer -Count '1' -Quiet)) { $Computer } }) 
+            [pscustomobject] @{ 
+                'Online' = $Online; 
+                'Offline' = $Offline 
+            }
         }
+        $ComputerVar = ($ComputerOnlineStatus.Online).ToUpper()
+        
+        Write-Verbose "---------- Computer(s) Online ----------" 
+        If ($ComputerOnlineStatus.Online) { 
+            ($ComputerOnlineStatus.Online).ToUpper() 
+        } 
         Else { 
-            $NewLine 
-            Write-Output -Verbose "=======================================================" 
-            $NewLine                                                                      
-            Write-Output -Verbose "            Check Computer(s) Online Status            " 
-            $NewLine                                  
-            Write-Output -Verbose "=======================================================" 
-            $NewLine 
- 
-            $ComputerOnlineStatus = Foreach ($Computer in $ComputerName) { 
-                $Online  = @(ForEach-Object -Process { If (Test-Connection -ComputerName $Computer -Count '1' -Quiet) { $Computer } }) 
-                $Offline = @(ForEach-Object -Process { If (!(Test-Connection -ComputerName $Computer -Count '1' -Quiet)) { $Computer } }) 
-                [pscustomobject] @{ 
-                    'Online' = $Online; 
-                    'Offline' = $Offline 
-                }
-            } 
- 
-            $ComputerVar = ($ComputerOnlineStatus.Online).ToUpper() 
- 
-            $NewLine  
-            Write-Output -Verbose "---------- Computer(s) Online ----------" 
-            $NewLine 
-            If ($ComputerOnlineStatus.Online) { 
-                ($ComputerOnlineStatus.Online).ToUpper() 
-                $NewLine 
-            } 
-            Else { 
-                Write-Output -Verbose 'N/A' 
-                $NewLine 
-            } 
-                     
-            Write-Output -Verbose "---------- Computer(s) Offline ----------" 
-            $NewLine 
- 
-            If ($ComputerOnlineStatus.Offline) {
-                ($ComputerOnlineStatus.Offline).ToUpper() 
-                $NewLine 
-            }   
-            Else { 
-                Write-Output -Verbose 'N/A' 
-                $NewLine 
-            }   
+            Write-Verbose 'N/A' 
         } 
-    } 
+
+        Write-Verbose "---------- Computer(s) Offline ----------" 
  
-    Process { 
-        Switch ($SCCMClientAction) { 
-             '1' { $ClientAction = '{00000000-0000-0000-0000-000000000001}' } 
-             '2' { $ClientAction = '{00000000-0000-0000-0000-000000000002}' } 
-             '3' { $ClientAction = '{00000000-0000-0000-0000-000000000003}' } 
-             '4' { $ClientAction = '{00000000-0000-0000-0000-000000000010}' } 
-             '5' { $ClientAction = '{00000000-0000-0000-0000-000000000011}' } 
-             '6' { $ClientAction = '{00000000-0000-0000-0000-000000000012}' } 
-             '7' { $ClientAction = '{00000000-0000-0000-0000-000000000021}' } 
-             '8' { $ClientAction = '{00000000-0000-0000-0000-000000000022}' } 
-             '9' { $ClientAction = '{00000000-0000-0000-0000-000000000023}' } 
-            '10' { $ClientAction = '{00000000-0000-0000-0000-000000000024}' } 
-            '11' { $ClientAction = '{00000000-0000-0000-0000-000000000025}' } 
-            '12' { $ClientAction = '{00000000-0000-0000-0000-000000000026}' } 
-            '13' { $ClientAction = '{00000000-0000-0000-0000-000000000027}' } 
-            '14' { $ClientAction = '{00000000-0000-0000-0000-000000000031}' } 
-            '15' { $ClientAction = '{00000000-0000-0000-0000-000000000032}' } 
-            '16' { $ClientAction = '{00000000-0000-0000-0000-000000000037}' } 
-            '17' { $ClientAction = '{00000000-0000-0000-0000-000000000040}' } 
-            '18' { $ClientAction = '{00000000-0000-0000-0000-000000000041}' } 
-            '19' { $ClientAction = '{00000000-0000-0000-0000-000000000042}' } 
-            '20' { $ClientAction = '{00000000-0000-0000-0000-000000000043}' } 
-            '21' { $ClientAction = '{00000000-0000-0000-0000-000000000051}' } 
-            '22' { $ClientAction = '{00000000-0000-0000-0000-000000000061}' } 
-            '23' { $ClientAction = '{00000000-0000-0000-0000-000000000062}' } 
-            '24' { $ClientAction = '{00000000-0000-0000-0000-000000000063}' } 
-            '25' { $ClientAction = '{00000000-0000-0000-0000-000000000071}' } 
-            '26' { $ClientAction = '{00000000-0000-0000-0000-000000000101}' } 
-            '27' { $ClientAction = '{00000000-0000-0000-0000-000000000102}' } 
-            '28' { $ClientAction = '{00000000-0000-0000-0000-000000000103}' } 
-            '29' { $ClientAction = '{00000000-0000-0000-0000-000000000104}' } 
-            '30' { $ClientAction = '{00000000-0000-0000-0000-000000000105}' } 
-            '31' { $ClientAction = '{00000000-0000-0000-0000-000000000106}' } 
-            '32' { $ClientAction = '{00000000-0000-0000-0000-000000000107}' } 
-            '33' { $ClientAction = '{00000000-0000-0000-0000-000000000108}' } 
-            '34' { $ClientAction = '{00000000-0000-0000-0000-000000000109}' } 
-            '35' { $ClientAction = '{00000000-0000-0000-0000-000000000110}' } 
-            '36' { $ClientAction = '{00000000-0000-0000-0000-000000000111}' } 
-            '37' { $ClientAction = '{00000000-0000-0000-0000-000000000112}' } 
-            '38' { $ClientAction = '{00000000-0000-0000-0000-000000000113}' } 
-            '39' { $ClientAction = '{00000000-0000-0000-0000-000000000114}' } 
-            '40' { $ClientAction = '{00000000-0000-0000-0000-000000000115}' } 
-            '41' { $ClientAction = '{00000000-0000-0000-0000-000000000116}' } 
-            '42' { $ClientAction = '{00000000-0000-0000-0000-000000000120}' } 
-            '43' { $ClientAction = '{00000000-0000-0000-0000-000000000121}' } 
-            '44' { $ClientAction = '{00000000-0000-0000-0000-000000000122}' } 
-            '45' { $ClientAction = '{00000000-0000-0000-0000-000000000123}' } 
-            '46' { $ClientAction = '{00000000-0000-0000-0000-000000000131}' } 
-            '47' { $ClientAction = '{00000000-0000-0000-0000-000000000221}' } 
-            '48' { $ClientAction = '{00000000-0000-0000-0000-000000000222}' } 
-            '49' { $ClientAction = '{00000000-0000-0000-0000-000000000223}' }  
-        } 
-         
-        If (!($PSBoundParameters.Keys.Contains('SCCMActionsBundle'))) { 
-            Foreach ($Computer in $ComputerVar) { 
-               Try {          
-                    $NewLine  
-                    Invoke-WmiMethod -ComputerName $Computer -Namespace root\ccm -Class sms_client -Name TriggerSchedule -ArgumentList $ClientAction -ErrorAction Stop 
-                    $NewLine 
-                    Write-Output -Verbose "The specified SCCM client action was successfully initiated on computer $Computer" 
-                    $NewLine 
-                } 
-                Catch { 
-                    $NewLine 
-                    Write-Warning -Message "The following error occurred when trying to run the specified SCCM client action on computer ${Computer}: $_" 
-                    $Newline 
-                }    
-            } 
-        } 
- 
+        If ($ComputerOnlineStatus.Offline) {
+            ($ComputerOnlineStatus.Offline).ToUpper() 
+        }   
         Else { 
-            Foreach ($Computer in $ComputerVar) { 
-                Write-Output -Verbose '---------- Running SCCM Client Actions Bundle ----------' 
-                Try {          
-                    $NewLine 
-                    Write-Output -Verbose '===========================================' 
-                    Write-Output -Verbose 'Machine Policy Retrieval & Evaluation Cycle' 
-                    Write-Output -Verbose '===========================================' 
-                    $NewLine  
-                    Invoke-WmiMethod -ComputerName $Computer -Namespace root\ccm -Class sms_client -Name TriggerSchedule -ArgumentList '{00000000-0000-0000-0000-000000000021}' -ErrorAction Stop 
-                    $NewLine 
-                    Write-Output -Verbose 'Machine Policy Retrieval and Evaluation Cycle action successfully initiated' 
-                    $NewLine 
-                    Write-Output -Verbose 'Waiting 5 minutes before running next SCCM client action...' 
-                    Start-Sleep -Seconds 300 
-                    $NewLine 
-                } 
-                Catch { 
-                    $NewLine 
-                    Write-Warning -Message "The following error occurred when trying to run the specified SCCM client action on computer ${Computer}: $_" 
-                    $Newline 
-                    Break 
-                }  
-                Try {          
-                    $NewLine 
-                    Write-Output -Verbose '===========================' 
-                    Write-Output -Verbose 'Software Updates Scan Cycle' 
-                    Write-Output -Verbose '===========================' 
-                    $NewLine 
-                    Invoke-WmiMethod -ComputerName $Computer -Namespace root\ccm -Class sms_client -Name TriggerSchedule -ArgumentList '{00000000-0000-0000-0000-000000000113}' -ErrorAction Stop 
-                    $NewLine 
-                    Write-Output -Verbose 'Software Updates Scan Cycle action successfully initiated' 
-                    $NewLine 
-                    Write-Output -Verbose 'Waiting 5 minutes before running next SCCM client action...' 
-                    Start-Sleep -Seconds 300 
-                    $NewLine 
-                } 
-                Catch { 
-                    $NewLine 
-                    Write-Warning -Message "The following error occurred when trying to run the specified SCCM client action on computer ${Computer}: $_" 
-                    $Newline 
-                    Break 
-                }  
- 
-                Try {
-                    $NewLine 
-                    Write-Output -Verbose '============================================' 
-                    Write-Output -Verbose 'Software Updates Deployment Evaluation Cycle' 
-                    Write-Output -Verbose '============================================' 
-                    $NewLine  
-                    Invoke-WmiMethod -ComputerName $Computer -Namespace root\ccm -Class sms_client -Name TriggerSchedule -ArgumentList '{00000000-0000-0000-0000-000000000108}' -ErrorAction Stop 
-                    $NewLine 
-                    Write-Output -Verbose 'Software Updates Deployment Evaluation Cycle action successfully initiated' 
-                    $NewLine 
-                    Write-Output -Verbose 'Waiting 5 minutes before running next SCCM client action...' 
-                    Start-Sleep -Seconds 300 
-                    $NewLine 
-                } 
-                Catch { 
-                    $NewLine 
-                    Write-Warning -Message "The following error occurred when trying to run the specified SCCM client action on computer ${Computer}: $_" 
-                    $Newline 
-                    Break 
-                }  
-            } 
-        } 
+            Write-Verbose 'N/A' 
+        }   
     } 
- 
-    End {}   
 } 
- 
+
+Process { 
+    Switch ($SCCMClientAction) { 
+         '1' { $ClientAction = '{00000000-0000-0000-0000-000000000001}' } 
+         '2' { $ClientAction = '{00000000-0000-0000-0000-000000000002}' } 
+         '3' { $ClientAction = '{00000000-0000-0000-0000-000000000003}' } 
+         '4' { $ClientAction = '{00000000-0000-0000-0000-000000000010}' } 
+         '5' { $ClientAction = '{00000000-0000-0000-0000-000000000011}' } 
+         '6' { $ClientAction = '{00000000-0000-0000-0000-000000000012}' } 
+         '7' { $ClientAction = '{00000000-0000-0000-0000-000000000021}' } 
+         '8' { $ClientAction = '{00000000-0000-0000-0000-000000000022}' } 
+         '9' { $ClientAction = '{00000000-0000-0000-0000-000000000023}' } 
+        '10' { $ClientAction = '{00000000-0000-0000-0000-000000000024}' } 
+        '11' { $ClientAction = '{00000000-0000-0000-0000-000000000025}' } 
+        '12' { $ClientAction = '{00000000-0000-0000-0000-000000000026}' } 
+        '13' { $ClientAction = '{00000000-0000-0000-0000-000000000027}' } 
+        '14' { $ClientAction = '{00000000-0000-0000-0000-000000000031}' } 
+        '15' { $ClientAction = '{00000000-0000-0000-0000-000000000032}' } 
+        '16' { $ClientAction = '{00000000-0000-0000-0000-000000000037}' } 
+        '17' { $ClientAction = '{00000000-0000-0000-0000-000000000040}' } 
+        '18' { $ClientAction = '{00000000-0000-0000-0000-000000000041}' } 
+        '19' { $ClientAction = '{00000000-0000-0000-0000-000000000042}' } 
+        '20' { $ClientAction = '{00000000-0000-0000-0000-000000000043}' } 
+        '21' { $ClientAction = '{00000000-0000-0000-0000-000000000051}' } 
+        '22' { $ClientAction = '{00000000-0000-0000-0000-000000000061}' } 
+        '23' { $ClientAction = '{00000000-0000-0000-0000-000000000062}' } 
+        '24' { $ClientAction = '{00000000-0000-0000-0000-000000000063}' } 
+        '25' { $ClientAction = '{00000000-0000-0000-0000-000000000071}' } 
+        '26' { $ClientAction = '{00000000-0000-0000-0000-000000000101}' } 
+        '27' { $ClientAction = '{00000000-0000-0000-0000-000000000102}' } 
+        '28' { $ClientAction = '{00000000-0000-0000-0000-000000000103}' } 
+        '29' { $ClientAction = '{00000000-0000-0000-0000-000000000104}' } 
+        '30' { $ClientAction = '{00000000-0000-0000-0000-000000000105}' } 
+        '31' { $ClientAction = '{00000000-0000-0000-0000-000000000106}' } 
+        '32' { $ClientAction = '{00000000-0000-0000-0000-000000000107}' } 
+        '33' { $ClientAction = '{00000000-0000-0000-0000-000000000108}' } 
+        '34' { $ClientAction = '{00000000-0000-0000-0000-000000000109}' } 
+        '35' { $ClientAction = '{00000000-0000-0000-0000-000000000110}' } 
+        '36' { $ClientAction = '{00000000-0000-0000-0000-000000000111}' } 
+        '37' { $ClientAction = '{00000000-0000-0000-0000-000000000112}' } 
+        '38' { $ClientAction = '{00000000-0000-0000-0000-000000000113}' } 
+        '39' { $ClientAction = '{00000000-0000-0000-0000-000000000114}' } 
+        '40' { $ClientAction = '{00000000-0000-0000-0000-000000000115}' } 
+        '41' { $ClientAction = '{00000000-0000-0000-0000-000000000116}' } 
+        '42' { $ClientAction = '{00000000-0000-0000-0000-000000000120}' } 
+        '43' { $ClientAction = '{00000000-0000-0000-0000-000000000121}' } 
+        '44' { $ClientAction = '{00000000-0000-0000-0000-000000000122}' } 
+        '45' { $ClientAction = '{00000000-0000-0000-0000-000000000123}' } 
+        '46' { $ClientAction = '{00000000-0000-0000-0000-000000000131}' } 
+        '47' { $ClientAction = '{00000000-0000-0000-0000-000000000221}' } 
+        '48' { $ClientAction = '{00000000-0000-0000-0000-000000000222}' } 
+        '49' { $ClientAction = '{00000000-0000-0000-0000-000000000223}' }  
+    } 
+
+    If (!($PSBoundParameters.Keys.Contains('SCCMActionsBundle'))) { 
+        Foreach ($Computer in $ComputerVar) { 
+           Try {          
+                Invoke-WmiMethod -ComputerName $Computer -Namespace root\ccm -Class sms_client -Name TriggerSchedule -ArgumentList $ClientAction -ErrorAction Stop 
+                Write-Verbose "The specified SCCM client action was successfully initiated on computer $Computer" 
+            } 
+            Catch { 
+                Write-Warning -Message "The following error occurred when trying to run the specified SCCM client action on computer ${Computer}: $_" 
+            }    
+        } 
+    } 
+
+    Else { 
+        Foreach ($Computer in $ComputerVar) { 
+            Write-Verbose '---------- Running SCCM Client Actions Bundle ----------' 
+            Try {          
+                Write-Verbose 'Machine Policy Retrieval & Evaluation Cycle' 
+                Invoke-WmiMethod -ComputerName $Computer -Namespace root\ccm -Class sms_client -Name TriggerSchedule -ArgumentList '{00000000-0000-0000-0000-000000000021}' -ErrorAction Stop 
+                Write-Verbose 'Machine Policy Retrieval and Evaluation Cycle action successfully initiated' 
+                Write-Verbose 'Waiting 5 minutes before running next SCCM client action...' 
+                Start-Sleep -Seconds 300 
+            } 
+            Catch { 
+                Write-Warning -Message "The following error occurred when trying to run the specified SCCM client action on computer ${Computer}: $_" 
+                Break 
+            }  
+            Try {          
+                Write-Verbose 'Software Updates Scan Cycle' 
+                Invoke-WmiMethod -ComputerName $Computer -Namespace root\ccm -Class sms_client -Name TriggerSchedule -ArgumentList '{00000000-0000-0000-0000-000000000113}' -ErrorAction Stop 
+                Write-Verbose 'Software Updates Scan Cycle action successfully initiated' 
+                Write-Verbose 'Waiting 5 minutes before running next SCCM client action...' 
+                Start-Sleep -Seconds 300 
+            } 
+            Catch { 
+                Write-Warning -Message "The following error occurred when trying to run the specified SCCM client action on computer ${Computer}: $_" 
+                Break 
+            }  
+
+            Try {
+                Write-Verbose 'Software Updates Deployment Evaluation Cycle' 
+                Invoke-WmiMethod -ComputerName $Computer -Namespace root\ccm -Class sms_client -Name TriggerSchedule -ArgumentList '{00000000-0000-0000-0000-000000000108}' -ErrorAction Stop 
+                Write-Verbose 'Software Updates Deployment Evaluation Cycle action successfully initiated' 
+                Write-Verbose 'Waiting 5 minutes before running next SCCM client action...' 
+                Start-Sleep -Seconds 300 
+            } 
+            Catch { 
+                Write-Warning -Message "The following error occurred when trying to run the specified SCCM client action on computer ${Computer}: $_" 
+                Break 
+            }  
+        } 
+    } 
+} 
+End {}
