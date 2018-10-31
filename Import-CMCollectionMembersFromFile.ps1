@@ -33,7 +33,7 @@ if ($members.Count -gt 0) {
     Write-Host "$($members.Count) collection members found" -ForegroundColor Cyan
     $memberNames = ($members).ComputerName | Sort-Object ComputerName
     foreach ($comp in $computers) {
-        Write-Host "$comp"
+        Write-Verbose "computer: $comp"
         if ($memberNames -contains $comp) {
             $data = [ordered]@{
                 ComputerName = $comp 
@@ -45,11 +45,17 @@ if ($members.Count -gt 0) {
             #Write-Host "$comp is already a member"
         }
         else {
+            if ($WhatIfPreference) {
+                $action = 'Would be Added'
+            }
+            else {
+                $action = 'Added'
+            }
             .\tools\Add-CMDeviceToCollection.ps1 -ComputerName $comp -CollectionID $CollectionID -ServerName $ServerName -SiteCode $SiteCode
             $data = [ordered]@{
                 ComputerName = $comp 
                 CollectionID = $CollectionID
-                Action       = 'Added'
+                Action       = $action
                 DateStamp    = (Get-Date).DateTime
             }
             $count2++
