@@ -1,84 +1,61 @@
 #requires -Version 3.0
 <#
+.SYNOPSIS
+    The "Start-CMClientAction" function allows 49 different SCCM client actions to be initiated on one, or more computers.   
+
 .DESCRIPTION
-.NOTES
-  Based on The SavvyTech scirpt from 4/19/2016, updated 5/23/2017
-  Please refer to the TechNet Gallery at: https://gallery.technet.microsoft.com/Start-SCCM-Client-Actions-d3d84c3c 
-  .SYNOPSIS   
+    The "Start-CMClientAction" PowerShell function allows for the initiaion of 49 SCCM client actions that can be ran on the local computer, or remote computers. Only one client action can be ran at a time, so using an array to include several client actions is not allowed. The Configuration Manager applet in Control Panel on the Actions tab lists 10 actions and these are identified in the Notes section with a "ConfigMgr Control Panel Applet" in parenthesis. SCCM Administrators typically find themselves running the following 3 actions during their monthly software update deployments (patching): Machine Policy Retrieval & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle. Because these 3 actions are so common, I decided to offer a way to bundle them with a 5 minute wait time (300 seconds) between each action. The parameter to use to run these 3 bundled actions is the '-SCCMActionsBundle' parameter. The 'SCCMClientAction' and the 'SCCMActionsBundle' parameters are members of different parameter sets, so they cannot be used together.  
 
-      The "Start-CMClientAction" function allows 49 different SCCM client actions to be initiated on one, or more computers.   
+.PARAMETER ComputerName
+    Enter the name of one or more computers that you wish to initiate an SCCM client action on. 
 
-  .DESCRIPTION  
+.PARAMETER SCCMClientAction
+    Enter a numerical value from 1-49 that represents each SCCM client action listed in the Notes section under ther "SCCM Client Action Trigger Codes" heading. 
 
-      The "Start-CMClientAction" PowerShell function allows for the initiaion of 49 SCCM client actions that can be ran on the local computer, or remote computers. Only one client action can be ran at a time, so using an array to include several client actions is not allowed. The Configuration Manager applet in Control Panel on the Actions tab lists 10 actions and these are identified in the Notes section with a "ConfigMgr Control Panel Applet" in parenthesis. SCCM Administrators typically find themselves running the following 3 actions during their monthly software update deployments (patching): Machine Policy Retrieval & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle. Because these 3 actions are so common, I decided to offer a way to bundle them with a 5 minute wait time (300 seconds) between each action. The parameter to use to run these 3 bundled actions is the '-SCCMActionsBundle' parameter. The 'SCCMClientAction' and the 'SCCMActionsBundle' parameters are members of different parameter sets, so they cannot be used together.  
+.PARAMETER SCCMActionsBundle
+    A switch parameter that does not accept any values, but rather tells the function to run the following 3 actions listed in the Notes section under ther "SCCM Client Action Trigger Codes" heading: 
 
-  .PARAMETER ComputerName 
+    * Option 7 - Request Machine Assignments - (ConfigMgr Control Panel Applet - Machine Policy Retrieval & Evaluation Cycle) 
+    * Option 38 - Scan by Update Source - (ConfigMgr Control Panel Applet - Software Updates Scan Cycle) 
+    * Option 33 - Software Updates Assignments Evaluation Cycle - (ConfigMgr Control Panel Applet - Software Updates Deployment Evaluation Cycle)  
 
-      Enter the name of one or more computers that you wish to initiate an SCCM client action on. 
+.EXAMPLE 
+    Initiate an SCCM Client Action on the Local Computer  
+    Start-CMClientAction -SCCMClientAction 1 
 
-  .PARAMETER SCCMClientAction 
+.EXAMPLE 
+    Initiate an SCCM Client Action on a Remote Computer 
+    Start-CMClientAction -ComputerName 'RemoteComputer1' -SCCMClientAction 1 
 
-      Enter a numerical value from 1-49 that represents each SCCM client action listed in the Notes section under ther "SCCM Client Action Trigger Codes" heading. 
+.EXAMPLE 
+    Initiate an SCCM Client Action on Multiple Remote Computers 
+    Start-CMClientAction -ComputerName 'RemoteComputer1', 'RemoteComputer2', 'RemoteComputer3' -SCCMClientAction 1 
 
-  .PARAMETER SCCMActionsBundle 
+.EXAMPLE 
+    Initiate an SCCM Client Action on Multiple Remote Computers Using a List of Computers in a Text File 
+    Start-CMClientAction -ComputerName (Get-Content -Path "$env:userprofile\desktop\RemoteComputerList.txt") -SCCMClientAction 1 
 
-      A switch parameter that does not accept any values, but rather tells the function to run the following 3 actions listed in the Notes section under ther "SCCM Client Action Trigger Codes" heading: 
+.EXAMPLE 
+    Initiate an SCCM Client Action Bundle on the Local Computer that Runs Options 7, 38, and 33 (Machine Policy Retrievale & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle) 
+    Start-CMClientAction -SCCMActionsBundle 
 
-      * Option 7 - Request Machine Assignments - (ConfigMgr Control Panel Applet - Machine Policy Retrieval & Evaluation Cycle) 
-      * Option 38 - Scan by Update Source - (ConfigMgr Control Panel Applet - Software Updates Scan Cycle) 
-      * Option 33 - Software Updates Assignments Evaluation Cycle - (ConfigMgr Control Panel Applet - Software Updates Deployment Evaluation Cycle)  
+.EXAMPLE 
+    Initiate an SCCM Client Action Bundle on a Remote Computer that Runs Options 7, 38, and 33 (Machine Policy Retrievale & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle) 
+    Start-CMClientAction -ComputerName 'RemoteComputer1' -SCCMActionsBundle 
 
-  .EXAMPLE 
+.EXAMPLE 
+    Initiate an SCCM Client Action Bundle on Multiple Remote Computers that Runs Options 7, 38, and 33 (Machine Policy Retrievale & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle) 
+    Start-CMClientAction -ComputerName 'RemoteComputer1', 'RemoteComputer2', 'RemoteComputer3' -SCCMActionsBundle 
 
-      Initiate an SCCM Client Action on the Local Computer  
+.EXAMPLE 
+    Initiate an SCCM Client Action Bundle on Multiple Remote Computers Using a List of Computers in a Text File that Runs Options 7, 38, and 33 (Machine Policy Retrievale & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle) 
+    Start-CMClientAction -ComputerName (Get-Content -Path "$env:userprofile\desktop\RemoteComputerList.txt") -SCCMActionsBundle 
 
-      Start-CMClientAction -SCCMClientAction 1 
-
-  .EXAMPLE 
-
-      Initiate an SCCM Client Action on a Remote Computer 
-
-      Start-CMClientAction -ComputerName 'RemoteComputer1' -SCCMClientAction 1 
-
-  .EXAMPLE 
-
-      Initiate an SCCM Client Action on Multiple Remote Computers 
-
-      Start-CMClientAction -ComputerName 'RemoteComputer1', 'RemoteComputer2', 'RemoteComputer3' -SCCMClientAction 1 
-
-  .EXAMPLE 
-
-      Initiate an SCCM Client Action on Multiple Remote Computers Using a List of Computers in a Text File 
-
-      Start-CMClientAction -ComputerName (Get-Content -Path "$env:userprofile\desktop\RemoteComputerList.txt") -SCCMClientAction 1 
-
-   .EXAMPLE 
-
-      Initiate an SCCM Client Action Bundle on the Local Computer that Runs Options 7, 38, and 33 (Machine Policy Retrievale & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle) 
-
-      Start-CMClientAction -SCCMActionsBundle 
-
-   .EXAMPLE 
-
-      Initiate an SCCM Client Action Bundle on a Remote Computer that Runs Options 7, 38, and 33 (Machine Policy Retrievale & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle) 
-
-      Start-CMClientAction -ComputerName 'RemoteComputer1' -SCCMActionsBundle 
-
-   .EXAMPLE 
-
-      Initiate an SCCM Client Action Bundle on Multiple Remote Computers that Runs Options 7, 38, and 33 (Machine Policy Retrievale & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle) 
-
-      Start-CMClientAction -ComputerName 'RemoteComputer1', 'RemoteComputer2', 'RemoteComputer3' -SCCMActionsBundle 
-
-   .EXAMPLE 
-
-      Initiate an SCCM Client Action Bundle on Multiple Remote Computers Using a List of Computers in a Text File that Runs Options 7, 38, and 33 (Machine Policy Retrievale & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle) 
-
-      Start-CMClientAction -ComputerName (Get-Content -Path "$env:userprofile\desktop\RemoteComputerList.txt") -SCCMActionsBundle 
-
-    .NOTES 
-
-      SCCM Client Action Trigger Codes 
+.NOTES 
+    Based on The SavvyTech scirpt from 4/19/2016, updated 5/23/2017
+    Please refer to the TechNet Gallery at: https://gallery.technet.microsoft.com/Start-SCCM-Client-Actions-d3d84c3c 
+    
+    SCCM Client Action Trigger Codes 
       -------------------------------- 
 
        1 - {000000000001} Hardware Inventory - (ConfigMgr Control Panel Applet - Hardware Inventory Cycle) 
@@ -134,24 +111,19 @@
      
 [CmdletBinding()] 
 param ( 
-    [parameter(ValueFromPipeline=$True, 
-        ValueFromPipelineByPropertyName=$True, 
-        HelpMessage='Enter the name of either one or more computers')] 
-
+    [parameter(ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True, HelpMessage='Enter the name of either one or more computers')] 
         [Alias('CN')]    
         $ComputerName = $env:COMPUTERNAME,  
 
-    [parameter(ParameterSetName = 'Set 1', 
-        HelpMessage='Enter the SCCM client action numerical value')] 
+    [parameter(ParameterSetName = 'Set 1', HelpMessage='Enter the SCCM client action numerical value')] 
         [ValidateNotNullOrEmpty()] 
         [ValidateRange(1,49)] 
         [Alias('SCA')]    
-        [Int]$SCCMClientAction, 
+        [Int] $SCCMClientAction, 
 
-    [parameter(ParameterSetName = 'Set 2', 
-        HelpMessage='Use this switch parameter to run the following 3 SCCM client actions: Machine Policy Retrieval & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle')] 
+    [parameter(ParameterSetName = 'Set 2', HelpMessage='Use this switch parameter to run the following 3 SCCM client actions: Machine Policy Retrieval & Evaluation Cycle, Software Updates Scan Cycle, and Software Updates Deployment Evaluation Cycle')] 
         [Alias('SAB')]    
-        [Switch]$SCCMActionsBundle 
+        [Switch] $SCCMActionsBundle 
 ) 
 
 Begin { 
