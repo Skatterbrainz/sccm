@@ -10,7 +10,9 @@ param (
         [string] $SiteCode,
     [parameter(Mandatory=$False, HelpMessage="Type of Collection")]
         [ValidateSet('Device','User')]
-        [string] $CollectionType = 'Device'
+        [string] $CollectionType = 'Device',
+    [parameter(Mandatory=$False, HelpMessage="Wildcard filter on Collection Names list")]
+        [switch] $Like
 )
 $DatabaseName = "CM_$SiteCode"
 $QueryTimeout = 120
@@ -32,8 +34,14 @@ if ([string]::IsNullOrEmpty($CollectionName)) {
     $query += " ORDER BY Name"
 }
 else {
-    $query += " WHERE Name='$CollectionName'"
+    if ($Like) {
+        $query += " WHERE Name LIKE '$CollectionName`%'"
+    }
+    else {
+        $query += " WHERE Name='$CollectionName'"
+    }
 }
+Write-Verbose "query: $query"
 $cmd = New-Object System.Data.SqlClient.SqlCommand($query,$conn)
 $cmd.CommandTimeout = $QueryTimeout
 $ds = New-Object System.Data.DataSet
@@ -58,8 +66,21 @@ if ($rowcount -gt 0) {
         }
     }
     else {
-        $x = $($ds.Tables).Rows[0]
-        Write-Verbose "name: $CollectionName"
-        Write-Output $($x | Select -ExpandProperty CollectionID)
+        if (!$Like) {
+            $x = $($ds.Tables).Rows[0]
+            Write-Verbose "name: $CollectionName"
+            Write-Output $($x | Select -ExpandProperty CollectionID)
+        }
+        else {
+            $x = $($ds.Tables).Rows | Out-GridView -Title "Select Collection" -OutputMode Single
+            if ($x) {
+                Write-Verbose "name: $($x | Select -ExpandProperty Name)"
+                Write-Output $($x | Select -ExpandProperty CollectionID)
+            }
+            else {
+                Write-Warning "No selection made"
+                break
+            }
+        }
     }
 }
