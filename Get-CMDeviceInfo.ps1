@@ -1,16 +1,32 @@
+#requires -version 3.0
+<#
+.DESCRIPTION
+    Return query results for specific devices within ConfigMgr SQL database
+.PARAMETER ServerName
+    ConfigMgr SQL Server hostname
+.PARAMETER SiteCode
+    ConfigMgr site code
+.PARAMETER ComputerNames
+    Names of computers to query information about
+.EXAMPLE
+    $data = .\Get-CMDeviceInfo.ps1 -ServerName "cm01.contoso.local" -SiteCode "P01" -ComputerNames "DT123","DT456"
+.NOTES
+    1.0.1 - DS - Initial release
+#>
+
 [CmdletBinding()]
 param (
-    [parameter(Mandatory=$True)]
-      [ValidateNotNullOrEmpty()]
-      [string] $ServerName,
-    [parameter(Mandatory=$True)]
-      [ValidateNotNullOrEmpty()]
-      [string] $SiteCode,
-    [parameter(Mandatory=$True)]
-      [ValidateNotNullOrEmpty()]
-      [string[]] $ComputerNames
+    [parameter(Mandatory=$True, HelpMessage="ConfigMgr SQL Server host name")]
+        [ValidateNotNullOrEmpty()]
+        [string] $ServerName,
+    [parameter(Mandatory=$True, HelpMessage="ConfigMgr site code")]
+        [ValidateNotNullOrEmpty()]
+        [string] $SiteCode,
+    [parameter(Mandatory=$True, HelpMessage="Computer Names to query")]
+        [ValidateNotNullOrEmpty()]
+        [string[]] $ComputerNames
 )
-Write-Host "getting configmgr data"
+Write-Verbose "(Get-CmDeviceInfo - getting configmgr data)"
 $DatabaseName = "CM_$SiteCode"
 Write-Verbose "database name is $DatabaseName"
 $queryBase = @"
@@ -56,19 +72,5 @@ if ($ComputerNames.Count -gt 1) {
 else {
     $query += " WHERE (dbo.vWorkstationStatus.Name = '$ComputerNames')"
 }
-#Write-Host $query
-#break
-$QueryTimeout = 120
-$ConnectionTimeout = 30
-$conn = New-Object System.Data.SqlClient.SQLConnection
-$ConnectionString = "Server={0};Database={1};Integrated Security=True;Connect Timeout={2}" -f $ServerName,$DatabaseName,$ConnectionTimeout
-$conn.ConnectionString = $ConnectionString
-$conn.Open()
-$cmd = New-Object System.Data.SqlClient.SqlCommand($Query,$conn)
-$cmd.CommandTimeout = $QueryTimeout
-$ds = New-Object System.Data.DataSet
-$da = New-Object System.Data.SqlClient.SqlDataAdapter($cmd)
-[void]$da.Fill($ds)
-$conn.Close()
-$rows = $($ds.Tables).Rows.Count
-$($ds.Tables).Rows
+Write-Verbose $query
+.\Get-CMSQLQueryData.ps1 -Query $query -SQLServerName $ServerName -SiteCode $SiteCode
