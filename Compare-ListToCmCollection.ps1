@@ -20,6 +20,7 @@ param (
 )
 if ([string]::IsNullOrEmpty($ListFile)) {
     $ListFile = Get-ChildItem -Path $InputFilesPath -Filter "*.txt" | Out-GridView -Title "Select File to Process" -OutputMode Single
+    if (!$ListFile) { break }
     Write-Host "$ListFile" -ForegroundColor Cyan
     $filepath = $ListFile.FullName
     $filename = $ListFile.BaseName
