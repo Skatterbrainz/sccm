@@ -28,12 +28,17 @@ param (
         [string[]] $ComputerNames
 )
 Write-Verbose "----------------------------------------------"
-Write-Verbose "(Get-CmDeviceInfo - getting configmgr data)"
+if ($ComputerNames.Count -gt 1) {
+    Write-Verbose "(Get-CmDeviceInfo - $($ComputerNames.Count) names)"
+}
+else {
+    Write-Verbose "(Get-CmDeviceInfo - $ComputerNames)"
+}
 $DatabaseName = "CM_$SiteCode"
 Write-Verbose "database name is $DatabaseName"
 $queryBase = @"
 SELECT DISTINCT 
-	dbo.v_R_System.Name0, 
+	dbo.v_R_System.Name0 AS [Name], 
 	dbo.v_R_System.ResourceID, 
 	dbo.v_R_System.AD_Site_Name0 AS [ADSite], 
 	dbo.vWorkstationStatus.ClientVersion, 
@@ -75,10 +80,10 @@ FROM
 $query = $queryBase
 if ($ComputerNames.Count -gt 1) {
     $complist = ($ComputerNames | %{"'$_'"}) -join ','
-    $query += " WHERE (dbo.v_R_System.Name0 IN ($complist)) ORDER BY dbo.vWorkstationStatus.Name"
+    $query += " WHERE (dbo.v_R_System.Name0 IN ($complist)) ORDER BY dbo.v_R_System.Name0"
 }
 else {
     $query += " WHERE (dbo.v_R_System.Name0 = '$ComputerNames')"
 }
 #Write-Verbose $query
-.\Get-CMSQLQueryData.ps1 -Query $query -SQLServerName $ServerName -SiteCode $SiteCode
+.\tools\Get-CMSQLQueryData.ps1 -Query $query -SQLServerName $ServerName -SiteCode $SiteCode
