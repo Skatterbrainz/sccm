@@ -1,3 +1,15 @@
+<#
+.DESCRIPTION
+    Display ConfigMgr collections in grid view for selection
+.PARAMETER AdoConnection
+    ADO database connection object (opened)
+.EXAMPLE
+    $conn = Get-CmAdoConnection -SQLServerName "cm01.contoso.local" -DatabaseName "CM_P01" -SiteCode "P01"
+    $collID = Select-CmCollectionFromList.ps1 -AdoConnection $conn
+    $conn.Close()
+#>
+
+[CmdletBinding()]
 param (
     [parameter(Mandatory=$True)]
     [ValidateNotNull()]
