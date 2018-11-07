@@ -38,6 +38,8 @@ param (
     [parameter(Mandatory=$False, HelpMessage="Display results in gridview")]
         [switch] $Grid
 )
+Write-Verbose "----------------------------------------------"
+Write-Verbose "(Get-CmCollectionMember: $CollectionID)"
 $DatabaseName = "CM_$SiteCode"
 $QueryTimeout = 120
 $ConnectionTimeout = 30
@@ -92,9 +94,11 @@ SELECT DISTINCT
     dbo.v_R_System.Is_Virtual_Machine0 AS IsVirtual, 
     dbo.v_R_System.Last_Logon_Timestamp0 AS LogonTime, 
     dbo.v_R_System.User_Domain0 AS Domain 
-FROM dbo.v_R_System INNER JOIN
-    dbo.v_ClientCollectionMembers ON dbo.v_R_System.ResourceID = dbo.v_ClientCollectionMembers.ResourceID
-WHERE (dbo.v_ClientCollectionMembers.CollectionID = '$CollectionID')
+FROM dbo.v_R_System LEFT OUTER JOIN
+	dbo.v_CollectionRuleDirect
+    ON dbo.v_R_System.ResourceID = dbo.v_CollectionRuleDirect.ResourceID
+WHERE 
+	(dbo.v_CollectionRuleDirect.CollectionID = '$CollectionID')
 ORDER BY ComputerName
 "@
 
