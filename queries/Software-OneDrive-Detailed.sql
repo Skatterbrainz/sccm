@@ -1,17 +1,17 @@
 SELECT DISTINCT 
 	dbo.v_R_System.Name0 AS Computer, 
-	dbo.v_GS_SoftwareFile.FileName, 
-	dbo.v_GS_SoftwareFile.FileVersion, 
-	CASE 
-		WHEN (FileVersion = '18.151.0729.0012') THEN 'Current' 
-		ELSE '' END AS Status, 
-	dbo.v_GS_SoftwareFile.FileSize, 
-	dbo.v_GS_SoftwareFile.FilePath
+	dbo.v_GS_INSTALLED_EXECUTABLE.ResourceID, 
+	dbo.v_GS_INSTALLED_EXECUTABLE.ExecutableName0 AS ExeName, 
+	dbo.v_GS_INSTALLED_EXECUTABLE.FileSize0 AS FileSize, 
+	dbo.v_GS_INSTALLED_EXECUTABLE.FileVersion0 AS FileVersion, 
+	dbo.v_GS_INSTALLED_EXECUTABLE.InstalledFilePath0 AS InstallPath, 
+	dbo.v_GS_INSTALLED_EXECUTABLE.ProductCode0 AS ProductCode, 
+	dbo.v_GS_INSTALLED_EXECUTABLE.ProductVersion0 AS ProductVersion, 
+	dbo.v_GS_INSTALLED_EXECUTABLE.Publisher0 AS Publisher
 FROM 
-	dbo.v_GS_SoftwareFile INNER JOIN
-	dbo.v_R_System ON dbo.v_GS_SoftwareFile.ResourceID = dbo.v_R_System.ResourceID
+	dbo.v_GS_INSTALLED_EXECUTABLE INNER JOIN
+	dbo.v_R_System ON dbo.v_GS_INSTALLED_EXECUTABLE.ResourceID = dbo.v_R_System.ResourceID
 WHERE 
-	(dbo.v_GS_SoftwareFile.FileName = 'OneDrive.exe')
+	(dbo.v_GS_INSTALLED_EXECUTABLE.ExecutableName0 IN ('OneDrive.exe', 'Groove.exe'))
 ORDER BY 
-	Computer, 
-	dbo.v_GS_SoftwareFile.FilePath
+	Computer
