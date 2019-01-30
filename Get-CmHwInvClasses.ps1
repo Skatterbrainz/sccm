@@ -6,7 +6,7 @@ function Get-CmHwInvClasses {
       [ValidateNotNullOrEmpty()]
       [string] $SQLServerName,
       [parameter(Mandatory=$True)]
-      [ValidateLength(3)]
+      [ValidateLength(3,3)]
       [string] $SiteCode
     )
     try {
