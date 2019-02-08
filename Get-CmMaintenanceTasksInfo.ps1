@@ -1,7 +1,11 @@
 function Get-CmMaintenanceTasksInfo {
   param (
-    $ServerName,
-    $SiteCode
+    [parameter(Mandatory=$True)]
+      [ValidateNotNullOrEmpty()]
+      [string] $ServerName,
+    [parameter(Mandatory=$True)]
+      [ValidateLength(3,3)]
+      [string] $SiteCode
   )
   $Tasks = Get-WmiObject -Namespace "root/sms/site_$SiteCode" -ComputerName $ServerName -Query 'Select * from SMS_SCI_SQLTask' | Sort-Object TaskName
 
