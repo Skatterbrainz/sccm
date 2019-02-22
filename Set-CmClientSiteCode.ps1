@@ -1,13 +1,15 @@
 function Set-CmClientSiteCode {
   <#
   .DESCRIPTION
+  	Set CM client site code by auto-assignment or explicit value
   .PARAMETER SiteCode
+  	Site code text
   .EXAMPLE
-  Set-CmClientSiteCode
+  	Set-CmClientSiteCode
   .EXAMPLE
-  Set-CmClientSiteCode -SiteCode "ABC"
+  	Set-CmClientSiteCode -SiteCode "ABC"
   .EXAMPLE
-  Invoke-Command -ComputerName "client03" -File "c:\scripts\Set-CmClientSiteCode.ps1"
+  	Invoke-Command -ComputerName "client03" -File "c:\scripts\Set-CmClientSiteCode.ps1"
   #>
 	[CmdletBinding()]
 	param (
