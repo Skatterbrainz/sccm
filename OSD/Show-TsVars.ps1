@@ -15,20 +15,17 @@ Lazy hack: David Stein
 https://blogs.technet.microsoft.com/mniehaus/2010/04/26/dumping-task-sequence-variables/
 
 .EXAMPLE
-.\OSD-ShowVars.ps1
+.\Show-TsVars.ps1
 
 #>
-
-# Determine where to do the logging 
-$TSenv = New-Object -COMObject Microsoft.SMS.TSEnvironment 
-$logPath = $TSenv.Value("_SMSTSLogPath") 
-$logFile = "$logPath\$($myInvocation.MyCommand).log"
-
-# Start the logging 
-Start-Transcript $logFile
-
-# Write all the variables and their values 
-$TSenv.GetVariables() | % { Write-Host "$_ = $($tsenv.Value($_))" }
-
-# Stop logging 
-Stop-Transcript 
+try {
+	$TSenv   = New-Object -COMObject Microsoft.SMS.TSEnvironment 
+	$logPath = $TSenv.Value("_SMSTSLogPath") 
+	$logFile = Join-Path -Path $logPath" -ChildPath "$($myInvocation.MyCommand).log"
+	Start-Transcript $logFile
+	$TSenv.GetVariables() | Foreach-Object { Write-Host "$_ = $($tsenv.Value($_))" }
+	Stop-Transcript 
+}
+catch {
+	Write-Output $Error[0].Exception.Message
+}
