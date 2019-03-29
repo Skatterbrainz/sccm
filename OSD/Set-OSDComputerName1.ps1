@@ -52,19 +52,19 @@ Form text box width when using Interactive param. Default is 150
 powershell -ExecutionPolicy Bypass -File .\Set-ComputerName.ps1 -Testing
  
 .EXAMPLE 
-powershell -File .\Set-ComputerName.ps1 -Interactive
+powershell -File .\Set-OSDComputerName1.ps1 -Interactive
 
 .EXAMPLE
-powershell -File .\Set-ComputerName.ps1 -UseLocation -DefaultLocation "NYC"
+powershell -File .\Set-OSDComputerName1.ps1 -UseLocation -DefaultLocation "NYC"
 
 .EXAMPLE
-powershell -File .\Set-ComputerName.ps1 -UseHyphens
+powershell -File .\Set-OSDComputerName1.ps1 -UseHyphens
 
 .EXAMPLE
-powershell -File .\Set-ComputerName.ps1 -Interactive -DefaultName "DT001"
+powershell -File .\Set-OSDComputerName1.ps1 -Interactive -DefaultName "DT001"
 
 .EXAMPLE
-powershell -File .\Set-ComputerName.ps1 -Interactive -FormHeight 200 -FormWidth 500 -TextBoxSize 100 -FormMessage "Enter Name"
+powershell -File .\Set-OSDComputerName1.ps1 -Interactive -FormHeight 200 -FormWidth 500 -TextBoxSize 100 -FormMessage "Enter Name"
  
 .NOTES 
 This is a very simple version of a OSD prompt for a computername. You can add extra validation to the computer name, for example a regular expression test  
