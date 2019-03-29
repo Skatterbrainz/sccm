@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  cm_OSDComputerName.ps1
+  .\OSDComputerName3.ps1
 .NOTES
   written by me. :D
 #>
@@ -35,17 +35,19 @@ switch ($chType) {
     24 { $prefix = "S" }
     default { $prefix = "U" }
 }
+try {
+	if ($serialNum.Length -gt 8) {
+		$sn = $serialNum.Substring($serialNum.length -8, 8)
+	}
+	else {
+		$sn = $serialNum
+	}
+	$newName = $prefix +"-$sn"
+	Write-Output "INFO: New Name = $newName"
 
-if ($serialNum.Length -gt 8) {
-    $sn = $serialNum.Substring($serialNum.length -8, 8)
+	$tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment
+	$tsenv.Value("OSDComputerName") = $newName
 }
-else {
-    $sn = $serialNum
+catch {
+	Write-Output $Error[0].Exception.Message
 }
-
-$newName = $prefix +"-$sn"
-
-Write-Output "INFO: New Name = $newName"
-
-$tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment
-$tsenv.Value("OSDComputerName") = $newName
