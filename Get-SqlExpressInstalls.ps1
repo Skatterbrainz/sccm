@@ -44,7 +44,7 @@ function Get-SqlExpressInstalls [
           $v  = ($row.Version -split '\.')[0..3]
           # shoehorn the weird version into less weird: 
           # 12.1.4100.1 --> 12.0.4100.1
-          if ($v[1] -in (1,2,3,4,5)) { $v[1] = 0 }
+          if ($v[1] -in (1..5)) { $v[1] = 0 }
           $v = $v -join '.'
           $vn = $($csvdata | ? {$_.Version -eq $v})
           $props = [ordered]@{
