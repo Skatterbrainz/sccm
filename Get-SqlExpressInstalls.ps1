@@ -1,8 +1,24 @@
 #requires -module dbatools
+<#
+.SYNOPSIS
+	Get SQL Express installations data from ConfigMgr inventory
+.DESCRIPTION
+	Same as Synopsis, only longer and more wordy stuff added with beer and french fries
+.PARAMETER CsvFile
+	Path to 'sqlserverversions.csv' data file
+.PARAMETER SqlHost
+	SQL Server instance name
+.PARAMETER SiteCode
+	Configuration Manager 3-character site code
+.EXAMPLE
+	Get-SqlExpressInstalls -SqlHost "cm01" -SiteCode "P01"
+.NOTES
+	B flat, C sharp, A minor 7
+#>
 function Get-SqlExpressInstalls {
     param (
       [parameter(Mandatory=$False)]
-        [string] $CsvFile = ".\sqlserverversions.csv",
+        [string] $CsvFile = 'https://raw.githubusercontent.com/Skatterbrainz/sccm/master/sqlserverversions.csv',
       [parameter(Mandatory=$True)]
         [ValidateNotNullOrEmpty()]
         [string] $SqlHost,
@@ -10,14 +26,16 @@ function Get-SqlExpressInstalls {
         [ValidateLength(3,3)]
         [string] $SiteCode
     )
-
-    if (-not(Test-Path $CsvFile)) {
-      Write-Warning "DOA: csv file not found $csvfile"
-      break
+    if ($CsvFile.StartsWith('http')) {
+        $csvdata = Invoke-RestMethod -Method Get -Uri $CsvFile -UseBasicParsing | ConvertFrom-Csv
     }
-
-    $csvdata = Import-Csv -Path $CsvFile
-
+    else {
+        if (-not(Test-Path $CsvFile)) {
+          Write-Warning "DOA: csv file not found $csvfile"
+          break
+        }
+        $csvdata = Import-Csv -Path $CsvFile
+    }
     # note: the Support column below could be moved to the CSV file, but I'm lazy and dumb
 
     $query = "SELECT DISTINCT
@@ -42,9 +60,7 @@ function Get-SqlExpressInstalls {
         $rows = Invoke-DbaQuery -SqlInstance $SqlHost -Database "CM_$SiteCode" -Query $query -ErrorAction SilentlyContinue
         foreach ($row in $rows) {
             $v  = ($row.Version -split '\.')[0..3]
-            # apply magic voodoo butter sauce, simmer and stir
-            # allow to cool and cut into small squares with desired version numbers
-            if ($v[1] -in (1,2,3,4,5)) { 
+            if ($v[1] -in (0..5)) { 
                 if ([int]$v[0] -lt 11) {
                     $v[1] = '00'
                 }
