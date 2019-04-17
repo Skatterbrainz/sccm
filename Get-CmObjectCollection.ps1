@@ -1,5 +1,3 @@
-if (!$cred) { $cred = (Get-Credential) }
-
 function Get-CmObjectCollection {
     [CmdletBinding()]
     param (
@@ -34,6 +32,7 @@ function Get-CmObjectCollection {
 }
 
 <#
-Get-CmObjectCollection -Computer "CM01" -SiteCode "P01" -ClassName "SMS_R_System"
-Get-CmObjectCollection -Computer "CM01" -SiteCode "P01" -ClassName "SMS_G_System_WORKSTATION_STATUS"
+if (!$cred) { $cred = (Get-Credential) }
+Get-CmObjectCollection -Computer "CM01" -SiteCode "P01" -ClassName "SMS_R_System" -Credential $cred
+Get-CmObjectCollection -Computer "CM01" -SiteCode "P01" -ClassName "SMS_G_System_WORKSTATION_STATUS" -Credential $cred
 #>
