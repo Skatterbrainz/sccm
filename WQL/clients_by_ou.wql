@@ -1,0 +1,4 @@
+SELECT DISTINCT *
+    FROM SMS_R_System AS Sys 
+    WHERE 
+        Sys.SystemOUName = 'Contoso.Domain.local/OUName'
