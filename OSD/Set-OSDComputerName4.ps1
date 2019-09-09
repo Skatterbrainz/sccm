@@ -46,7 +46,7 @@ function Get-FormFactorCode {
     # desktops
     if ($cff -in (3..7)+(13,34,35)) { $ff = 'D' }
     # laptops
-    elseif ($cff -in (15..30)+(14,31,32,33,36)) { $ff = 'L' }
+    elseif ($cff -in (15..30)+(10,11,12,14,31,32,33,36)) { $ff = 'L' }
     # servers
     elseif ($cff -in (17..24)) { $ff = 'S' }
     # unknown
