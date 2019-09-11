@@ -14,6 +14,7 @@ param (
     [parameter()] [string] $LocationFile = $(Join-Path $PSScriptRoot 'locations.txt'),
     [parameter()] [ValidateSet('Left','Right')] [string] $TrimFrom = 'Left'
 )
+Write-Verbose "script version 1909.11"
 
 function Get-SerialNumber {
 	[CmdletBinding()]
@@ -64,7 +65,9 @@ function Get-LocationCode {
         [string] $DataFile = $LocationFile
     )
     try {
-        $gwa = Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $True} | Select-Object -ExpandProperty DefaultIPGateway
+        $gwa = Get-WmiObject -Class Win32_NetworkAdapterConfiguration | 
+            Where-Object {$_.IPEnabled -eq $True -and $_.DefaultIPGateway -ne '::'} | 
+                Select-Object -ExpandProperty DefaultIPGateway
         <#
         format of location data is as follows:
         GATEWAY=FULLNAME,ABBREV (no headings in file, shown here just for explanation)
@@ -84,7 +87,7 @@ function Get-LocationCode {
         foreach ($row in $dataset) {
             $rowdata = $row -split '='
             $gateway = $rowdata[0]
-            if ($gateway -eq $GatewayIPAddress) {
+            if ($gateway -eq $gwa) {
                 $location  = $rowdata[1]
                 $fullname  = ($location -split ',')[0]
                 $shortname = ($location -split ',')[1]
