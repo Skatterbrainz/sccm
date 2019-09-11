@@ -16,6 +16,8 @@ param (
 )
 Write-Verbose "script version 1909.11"
 
+#region internal functions
+
 function Get-SerialNumber {
 	[CmdletBinding()]
     param ()
@@ -105,6 +107,8 @@ function Get-LocationCode {
         Write-Output ""
     }
 }
+
+#endregion internal functions
 
 [string]$sn = Get-SerialNumber
 [string]$fc = Get-FormFactorCode
