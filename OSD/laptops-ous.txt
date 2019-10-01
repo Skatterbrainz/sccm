@@ -1,0 +1,2 @@
+ITS~OU=IT Services,OU=Laptops,OU=Devices,OU=CORP,DC=contoso,DC=local
+FIN~OU=Finance,OU=Laptops,OU=Devices,OU=CORP,DC=contoso,DC=local
