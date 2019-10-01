@@ -1,7 +1,30 @@
+<#
+.SYNOPSIS
+	Version 5 of the infamous Jon Warnken script
+.DESCRIPTION
+	Yeah
+.PARAMETER MaxSerialLen
+	Truncate BIOS serial number values to fit (default = 8 chars)
+.PARAMETER DefaultOU
+	Default OU when no department code matches
+.PARAMETER DepartmentsList
+	List of department codes for naming and OU mapping
+.PARAMETER DefaultDeptCode
+	Default department code for UI form
+.NOTES
+	* Add PowerShell sauce to the Boot Image (WinPE) cake batter
+	* Mix thoroughly while buck naked and wearing a rubber chicken hat
+	* Pour into a 8 x 12 configmgr package / no program seasoning
+	* Garnish configmgr task sequence at the very top
+	* Feeds 10,000 or more (0 calories per serving)
+	* Requires: desktops-ous.txt, and laptops-ous.txt files to make this 
+	  baby scream like a 12 yr old at a Justin Bieber concert
+	* OU structure example:  \contoso.local\CORP\Devices\<form>\<dept> (modify as you prefer)
+#>
 [CmdletBinding()]
 param (
     [parameter()][ValidateRange(3,15)][int] $MaxSerialLen = 8,
-    [parameter()][string] $DefaultOU = 'OU=Devices,OU=CORP,DC=contoso,DC=local',
+    [parameter()][ValidateNoNullOrEmpty()][string] $DefaultOU = 'OU=Devices,OU=CORP,DC=contoso,DC=local',
     [parameter()][string[]] $DepartmentsList = ('ENG','EXE','FIN','HRS','ITS','MKT'),
     [parameter()][string] $DefaultDeptCode = "ITS"
 )
