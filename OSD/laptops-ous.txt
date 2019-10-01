@@ -1,2 +1,6 @@
+ENG~OU=Engineering,OU=Laptops,OU=Devices,OU=CORP,DC=contoso,DC=local
+EXE~OU=Executive,OU=Laptops,OU=Devices,OU=CORP,DC=contoso,DC=local
+HRS~OU=Human Resources,OU=Laptops,OU=Devices,OU=CORP,DC=contoso,DC=local
 ITS~OU=IT Services,OU=Laptops,OU=Devices,OU=CORP,DC=contoso,DC=local
 FIN~OU=Finance,OU=Laptops,OU=Devices,OU=CORP,DC=contoso,DC=local
+MKT~OU=Marketing,OU=Laptops,OU=Devices,OU=CORP,DC=contoso,DC=local
