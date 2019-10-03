@@ -31,9 +31,9 @@ param (
 	[parameter(Mandatory)][string] $Type,
 	[parameter()][string] $To = "",
 	[parameter()][string] $Image,
-  [parameter()][string] $SiteServer = "cm01.contoso.com",
-  [parameter()][string] $smtpServer = "mail.contoso.com"
-  [parameter()][string] $smtpFrom = "sender@contoso.com" 
+	[parameter()][string] $SiteServer = "cm01.contoso.com",
+	[parameter()][string] $smtpServer = "mail.contoso.com"
+	[parameter()][string] $smtpFrom = "sender@contoso.com" 
 )
 
 $dateTime = Get-Date -f 'MM/dd/yyyy HH:mm:ss tt'
