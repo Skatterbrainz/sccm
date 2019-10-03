@@ -2,7 +2,7 @@
 
 ## Notes
 
-* Inspired by 
+* Inspired heavily and in all the right ways by the incomparable Nathan Zienhert (@theznerd)
 * TS Group "Failure Group"
   * Condition: (TSVar) ```_SMSTSLastActionSucceeded equals "false"```
   * Task Sequence Step "Capture Failure Conditions"
