@@ -4,17 +4,17 @@
 
 * Inspired by 
 * TS Group "Failure Group"
-  * Condition: (TSVar) _SMSTSLastActionSucceeded equals "false"
+  * Condition: (TSVar) ```_SMSTSLastActionSucceeded equals "false"```
   * Task Sequence Step "Capture Failure Conditions"
-    * SET TSVar FailedStepName = "%_SMSTSLastActionName%"
-    * SET TSVar FailedStepReturnCode = "%_SMSTSLastActionRetCode%"
-    * SET TSVar AllStepsSucceeded = "False"
+    * SET TSVar ```FailedStepName = "%_SMSTSLastActionName%"```
+    * SET TSVar ```FailedStepReturnCode = "%_SMSTSLastActionRetCode%"```
+    * SET TSVar ```AllStepsSucceeded = "False"```
   * Set TS Variable "(OSDResults) - Failure"
     * SET TSVar "OSDResults" = "Failure"
   * Connect to Network Folder
     * Map drive to Z:
   * Create Log Folder 
-    * cmd.exe /c md Z:\%OSDComputerName%\
+    * ```cmd.exe /c md Z:\%OSDComputerName%\```
   * Run PSScript: Send Deployment Failed Notification (Email) -- below
   * Run PSScript: Send Deployment Failed Notification (Teams)
 * TS Group "Success Group"
