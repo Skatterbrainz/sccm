@@ -14,7 +14,7 @@
 #>
 [CmdletBinding()]
 param(
-    [parameter(Mandatory)][string]$InputFile
+    [parameter(Mandatory,Position=0)][string]$InputFile
 )
 $ErrorActionPreference = 'SilentlyContinue'
 
