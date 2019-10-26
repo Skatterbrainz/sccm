@@ -1,0 +1,16 @@
+Apps\7-zip
+Apps\Google\Chrome
+Apps\Microsoft\O365ProPlus
+Apps\Mozilla\Firefox
+Apps\Notepad++
+Apps\VLC
+Certs
+DrvPkg
+DrvSrc
+MDT
+MDT\BootImages
+MDT\Settings
+MDT\Tools
+OSImages
+Scripts
+Tools
