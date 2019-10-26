@@ -1,0 +1,10 @@
+Apps\7-Zip~https://www.7-zip.org/a/7z1900-x64.msi
+Apps\Mozilla\Firefox~https://download-installer.cdn.mozilla.net/pub/firefox/releases/70.0/win64/en-US/Firefox%20Setup%2070.0.msi
+Apps\Google\Chrome~https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi
+Apps\Notepad++~http://download.notepad-plus-plus.org/repository/7.x/7.8/npp.7.8.Installer.x64.exe
+Apps\VLC~https://ftp.osuosl.org/pub/videolan/vlc/3.0.8/win64/vlc-3.0.8-win64.exe
+Scripts\WSUS~https://damgoodadmin.com/download/invoke-dgasoftwareupdatemaintenance/?wpdmdl=326&refresh=5db464511e44c1572103249~Invoke-DgaSoftwareUpdateMaintenance.zip
+Tools\DriverAutomationTool~https://gallery.technet.microsoft.com/Driver-Tool-Automate-9ddcc010/file/224244/1/Driver%20Automation%20Tool.zip
+Tools\ConfigMgrWebService~https://gallery.technet.microsoft.com/ConfigMgr-WebService-100-572825b2/file/223724/1/ConfigMgr%20WebService%201.8.0.zip
+Tools\ConfigMgrWebService~https://raw.githubusercontent.com/SCConfigMgr/ConfigMgr/master/Operating%20System%20Deployment/Drivers/Invoke-CMApplyDriverPackage.ps1
+Tools\SQL~https://ola.hallengren.com/scripts/MaintenanceSolution.sql
