@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
-    [parameter()][ValidateNotNullOrEmpty()][string]$InputFile = "I:\scripts\appdownloads.txt",
-    [parameter()][ValidateNotNullOrEmpty()][string]$rootPath = "H:\SOURCES"
+    [parameter()][ValidateNotNullOrEmpty()][string]$InputFile = "downloads.txt",
+    [parameter()][ValidateNotNullOrEmpty()][string]$rootPath = "E:\SOURCES"
 )
 try {
     $apps = Get-Content $InputFile
