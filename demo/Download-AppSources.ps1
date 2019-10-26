@@ -22,7 +22,8 @@ try {
         }
         $destination = Join-Path -Path $destPath -ChildPath "$filename"
         if (!(Test-Path $destination)) {
-            Invoke-WebRequest -Uri $appSource -OutFile $destination
+            #Invoke-WebRequest -Uri $appSource -OutFile $destination
+            [void](New-Object System.Net.WebClient).DownloadFile($appSource, $destination)
         }
         else {
             Write-Verbose "file exists: $destination"
