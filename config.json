@@ -1,0 +1,38 @@
+{
+    "Summary": {
+        "query": "SELECT ( SELECT COUNT(*) FROM v_R_SYSTEM ) AS Devices,( SELECT COUNT(*) FROM v_R_USER ) AS Users",
+        "properties": "Devices,Users"
+    },
+    "OperatingSystems": {
+        "query": "select distinct Caption0 as OSName,BuildNumber0 as BuildNum, case when (BuildNumber0 = 18363) then '1909' when (BuildNumber0 = 18362) then '1903' when (BuildNumber0 = 17763) then '1809' when (BuildNumber0 = 17134) then '1803' when (BuildNumber0 = 16299) then '1709' when (BuildNumber0 = 15063) then '1703' when (BuildNumber0 = 14393) then '1607' when (BuildNumber0 = 10586) then '1511' when (BuildNumber0 = 10240) then '1507' else '' end as Build, CSDVersion0 as SvcPack, COUNT(*) as Devices from v_GS_OPERATING_SYSTEM group by Caption0,BuildNumber0,CSDVersion0 order by Caption0,BuildNumber0",
+        "properties": "OSName,BuildNum,Build,SvcPack,Devices"
+    },
+    "Models": {
+        "query": "select distinct Manufacturer0 as Manufacturer, Model0 as Model, Count(*) as Devices from dbo.v_GS_COMPUTER_SYSTEM group by Manufacturer0,Model0 order by Manufacturer0,Model0",
+        "properties": "Manufacturer,Model,Devices"
+    },
+    "Disks": {
+        "query": "select distinct ld.SystemName0 as Name, ld.Size0 as Capacity, ld.FreeSpace0 as FreeSpace, cs.Model0 as Model, case when (FreeSpace0 < 20000) then 'No' else 'Yes' end as Ready from v_GS_LOGICAL_DISK ld inner join v_GS_COMPUTER_SYSTEM cs on cs.ResourceID = ld.ResourceID where ld.DeviceID0 = 'C:' order by ld.SystemName0",
+        "properties": "Name,Model,Capacity,FreeSpace,Ready"
+    },
+    "Memory": {
+        "query": "select sys.Name0 as Name,pm.ResourceID,pm.Capacity0 as Memory from v_GS_PHYSICAL_MEMORY pm inner join v_R_SYSTEM sys on pm.ResourceID = sys.ResourceID group by sys.Name0,pm.ResourceID,pm.Capacity0 order by sys.Name0",
+        "properties": "Name,ResourceID,Memory"
+    },
+    "Software": {
+        "query": "select distinct ARPDisplayName0 as ProductName,ProductVersion0 as Version,Publisher0 as Publisher, ProductCode0 as ProductCode, COUNT(*) as Installs from v_GS_INSTALLED_SOFTWARE_CATEGORIZED where (LTRIM(ARPDisplayname0) <> '') and (SUBSTRING(ARPDisplayName0,0,2) <> '..') group by ARPDisplayName0,ProductVersion0,Publisher0,ProductCode0 order by ARPDisplayName0,ProductVersion0",
+        "properties": "Installs,ProductName,Version,Publisher,ProductCode"
+    },
+    "ADSites": {
+        "query": "select distinct sys.AD_Site_Name0 as ADSite, COUNT(*) as Devices from v_R_SYSTEM as sys group by AD_Site_Name0 order by AD_Site_Name0",
+        "properties": "ADSite,Devices"
+    },
+    "Gateways": {
+        "query": "select distinct DefaultIPGateway0 as Gateway, COUNT(*) as Devices from v_GS_NETWORK_ADAPTER_CONFIGURATION where DefaultIPGateway0 IS NOT NULL group by DefaultIPGateway0 order by Devices desc",
+        "properties": "Gateway,Devices"    
+    },
+    "DistPoints": {
+        "query": "select Servername,SMSSiteCode as Site,Description,Type,IsPXE as PXE,IsDoincEnabled as DOINC, IsBITS as BITS,IsMulticast as MCast,IsPullDP as PullDP,IsPeerDP as PeerDP, SslState as SSL,PreStagingAllowed as Prestage from v_DistributionPoints order by ServerName",
+        "properties": "Servername,Site,Description,Type,PXE,DOINC,BITS,MCast,PullDP,PeerDP,SSL,Prestage"
+    }
+}
