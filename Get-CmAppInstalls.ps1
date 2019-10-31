@@ -1,3 +1,4 @@
+#requires -modules dbatools
 <#
 .DESCRIPTION
     Query ConfigMgr SQL database for software product installs
@@ -36,25 +37,20 @@
 
 [CmdletBinding()]
 param (
+    [parameter(Mandatory=$False, HelpMessage="ConfigMgr Site Code")]
+        [ValidateNotNullOrEmpty()]
+        [string] $SiteCode = "P01",
+    [parameter(Mandatory=$False, HelpMessage="ConfigMgr DB Server Name")]
+        [ValidateNotNullOrEmpty()]
+        [string] $ServerName = "localhost",
     [parameter(Mandatory=$False, HelpMessage="Product Name Filter")]
         [ValidateSet('Office','ProjectStd','ProjectPro','VisioStd','VisioPro','All','Custom')]
         [string] $ProductName = 'Office',
     [parameter(Mandatory=$False, HelpMessage="Product Name to filter on")]
         [ValidateNotNullOrEmpty()]
-        [string] $AppFilter = "Microsoft Office 365 ProPlus%",
-    [parameter(Mandatory=$False, HelpMessage="ConfigMgr DB Server Name")]
-        [ValidateNotNullOrEmpty()]
-        [string] $ServerName = "cm01.contoso.local",
-    [parameter(Mandatory=$False, HelpMessage="ConfigMgr Site Code")]
-        [ValidateNotNullOrEmpty()]
-        [string] $SiteCode = "P01",
-    [parameter(Mandatory=$False, HelpMessage="Show Total row count only")]
-        [switch] $TotalCount,
-    [parameter(Mandatory=$False, HelpMessage="Show Detailed Columns")]
-        [switch] $Detailed,
-    [parameter(Mandatory=$False, HelpMessage="Suppress total count on detailed results")]
-        [switch] $NoCount
+        [string] $AppFilter = "Microsoft Office 365 ProPlus%"
 )
+
 switch ($ProductName) {
     'Office' {
         $AppFilter = "Microsoft Office 365 ProPlus%"
@@ -122,26 +118,10 @@ WHERE (dbo.v_GS_INSTALLED_SOFTWARE_CATEGORIZED.ProductName0 LIKE '$AppFilter')
 Write-Verbose "query...... $query"
 Write-Verbose "server..... $ServerName"
 Write-Verbose "database... $DatabaseName"
-#Timeout parameters
-$QueryTimeout = 120
-$ConnectionTimeout = 30
 
-#Action of connecting to the Database and executing the query and returning results if there were any.
-$conn = New-Object System.Data.SqlClient.SQLConnection
-$ConnectionString = "Server={0};Database={1};Integrated Security=True;Connect Timeout={2}" -f $ServerName,$DatabaseName,$ConnectionTimeout
-$conn.ConnectionString = $ConnectionString
-$conn.Open()
-$cmd = New-Object System.Data.SqlClient.SqlCommand($Query,$conn)
-$cmd.CommandTimeout = $QueryTimeout
-$ds = New-Object System.Data.DataSet
-$da = New-Object System.Data.SqlClient.SqlDataAdapter($cmd)
-[void]$da.Fill($ds)
-$conn.Close()
-if ($TotalCount) {
-    $($ds.Tables).Rows.Count
+try {
+    @(Invoke-DbaQuery -SqlInstance $ServerName -Database $DatabaseName -Query $query)
 }
-else {
-    $rows = $($ds.Tables).Rows.Count
-    $($ds.Tables).Rows
-    if (!$NoCount) { Write-Output "rows: $rows" }
+catch {
+    Write-Error $_.Exception.Message 
 }

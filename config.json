@@ -3,6 +3,10 @@
         "query": "SELECT ( SELECT COUNT(*) FROM v_R_SYSTEM ) AS Devices,( SELECT COUNT(*) FROM v_R_USER ) AS Users",
         "properties": "Devices,Users"
     },
+    "Devices": {
+        "query": "select distinct cs.Name0 as Name,cs.ResourceID,cs.Manufacturer0 as Manufacturer,sys.Operating_System_Name_and0 as OSName,sys.Build01 as OSBuild,cs.Model0 as Model,round(cast(pm.TotalPhysicalMemory0 as float)/1024/1024, 1) as TotalMemory,cs.SystemType0 as SystemType,sys.AD_Site_Name0 as ADSiteName,cs.UserName0 as UserName,sys.Client_Version0 as ClientVersion,sys.SID0 as SID,sys.AADDeviceID,ws.LastHardwareScan as LastHWScan,ws.LastDDR from v_GS_COMPUTER_SYSTEM cs inner join v_R_System sys on cs.ResourceID = sys.ResourceID inner join vWorkstationStatus ws on cs.ResourceID = ws.ResourceID inner join v_GS_X86_PC_MEMORY pm on cs.ResourceID = pm.ResourceID order by cs.Name0",
+        "properties": "Name,ResourceID,OSName,OSBuild,Manufacturer,Model,TotalMemory,SystemType,ADSiteName,UserName,ClientVersion,SID,AADDeviceID,LastHWScan,LastDDR"
+    },
     "OperatingSystems": {
         "query": "select distinct Caption0 as OSName,BuildNumber0 as BuildNum, case when (BuildNumber0 = 18363) then '1909' when (BuildNumber0 = 18362) then '1903' when (BuildNumber0 = 17763) then '1809' when (BuildNumber0 = 17134) then '1803' when (BuildNumber0 = 16299) then '1709' when (BuildNumber0 = 15063) then '1703' when (BuildNumber0 = 14393) then '1607' when (BuildNumber0 = 10586) then '1511' when (BuildNumber0 = 10240) then '1507' else '' end as Build, CSDVersion0 as SvcPack, COUNT(*) as Devices from v_GS_OPERATING_SYSTEM group by Caption0,BuildNumber0,CSDVersion0 order by Caption0,BuildNumber0",
         "properties": "OSName,BuildNum,Build,SvcPack,Devices"
@@ -16,7 +20,7 @@
         "properties": "Name,Model,Capacity,FreeSpace,Ready"
     },
     "Memory": {
-        "query": "select sys.Name0 as Name,pm.ResourceID,pm.Capacity0 as Memory from v_GS_PHYSICAL_MEMORY pm inner join v_R_SYSTEM sys on pm.ResourceID = sys.ResourceID group by sys.Name0,pm.ResourceID,pm.Capacity0 order by sys.Name0",
+        "query": "select sys.Name0 as Name,pm.ResourceID,SUM(pm.Capacity0) as Memory from v_GS_PHYSICAL_MEMORY pm inner join v_R_SYSTEM sys on pm.ResourceID = sys.ResourceID group by sys.Name0,pm.ResourceID order by sys.Name0",
         "properties": "Name,ResourceID,Memory"
     },
     "Software": {
