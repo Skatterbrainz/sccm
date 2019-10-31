@@ -1,0 +1,16 @@
+{
+    "Accounting": {
+        "users": {
+            "limiting": "All Users",
+            "queryrule": "select SMS_R_USER.ResourceID,SMS_R_USER.ResourceType,SMS_R_USER.Name,SMS_R_USER.UniqueUserName,SMS_R_USER.WindowsNTDomain from SMS_R_User where SMS_R_User.UserGroupName = 'CONTOSO\\Users-Accounting'",
+            "schedule": 1,
+            "folder": "UserCollection\\Departments\\Accounting"
+        },
+        "devices": {
+            "limiting": "All Desktop and Server Clients",
+            "queryrule": "select SMS_R_SYSTEM.ResourceID,SMS_R_SYSTEM.ResourceType,SMS_R_SYSTEM.Name,SMS_R_SYSTEM.SMSUniqueIdentifier,SMS_R_SYSTEM.ResourceDomainORWorkgroup,SMS_R_SYSTEM.Client from SMS_R_System where SMS_R_System.SystemGroupName = 'CONTOSO\\Computers-Accounting'",
+            "schedule": 1,
+            "folder": "DeviceCollection\\Departments\\Accounting"
+        }
+    }
+}

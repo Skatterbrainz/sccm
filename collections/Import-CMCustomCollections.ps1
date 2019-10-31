@@ -55,7 +55,7 @@ try {
     #Create new USER collection
     New-CMUserCollection -LimitingCollectionName "All Users" -Name "Users - Accounting - All" -refreshschedule $Schedule1 -Refreshtype Periodic
     #Create query for previously created collection
-    Add-CMUserCollectionQueryMembershipRule -CollectionName "Users - Accounting - All" -QueryExpression "select SMS_R_USER.ResourceID,SMS_R_USER.ResourceType,SMS_R_USER.Name,SMS_R_USER.UniqueUserName,SMS_R_USER.WindowsNTDomain from SMS_R_User where SMS_R_User.UserGroupName = 'CONSOTO\\Users-Accounting'" -RuleName "Users - Accounting - All"
+    Add-CMUserCollectionQueryMembershipRule -CollectionName "Users - Accounting - All" -QueryExpression "select SMS_R_USER.ResourceID,SMS_R_USER.ResourceType,SMS_R_USER.Name,SMS_R_USER.UniqueUserName,SMS_R_USER.WindowsNTDomain from SMS_R_User where SMS_R_User.UserGroupName = 'CONTOSO\\Users-Accounting'" -RuleName "Users - Accounting - All"
     #Move collection to appropriate folder
     $CMCollection = Get-CMUserCollection -Name "Users - Accounting - All"
     Move-CMObject -FolderPath "$SiteCode`:\UserCollection\Departments\Accounting" -InputObject $CMCollection
@@ -63,11 +63,12 @@ try {
     #Create new DEVICE collection
     New-CMDeviceCollection -LimitingCollectionName "All Workstations" -Name "Devices - Accounting - All" -refreshschedule $Schedule1 -Refreshtype Periodic
     #Create query for previously created collection
-    Add-CMDeviceCollectionQueryMembershipRule -CollectionName "Devices - Accounting - All" -QueryExpression "select SMS_R_SYSTEM.ResourceID,SMS_R_SYSTEM.ResourceType,SMS_R_SYSTEM.Name,SMS_R_SYSTEM.SMSUniqueIdentifier,SMS_R_SYSTEM.ResourceDomainORWorkgroup,SMS_R_SYSTEM.Client from SMS_R_System where SMS_R_System.SystemGroupName = 'VBGOV\\Computers - Accounting'" -RuleName "Devices - Accounting - All"
+    Add-CMDeviceCollectionQueryMembershipRule -CollectionName "Devices - Accounting - All" -QueryExpression "select SMS_R_SYSTEM.ResourceID,SMS_R_SYSTEM.ResourceType,SMS_R_SYSTEM.Name,SMS_R_SYSTEM.SMSUniqueIdentifier,SMS_R_SYSTEM.ResourceDomainORWorkgroup,SMS_R_SYSTEM.Client from SMS_R_System where SMS_R_System.SystemGroupName = 'CONTOSO\\Computers - Accounting'" -RuleName "Devices - Accounting - All"
     #Move collection to appropriate folder
     $CMCollection = get-cmdevicecollection -Name "Devices - Accounting - All"
     Move-CMObject -FolderPath "$SiteCode`:\DeviceCollection\Departments\Accounting" -InputObject $CMCollection
 
+    Set-Location $oldloc
 }
 catch {
     Write-Error $_.Exception.Message
