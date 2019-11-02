@@ -8,3 +8,5 @@ Tools\DriverAutomationTool~https://gallery.technet.microsoft.com/Driver-Tool-Aut
 Tools\ConfigMgrWebService~https://gallery.technet.microsoft.com/ConfigMgr-WebService-100-572825b2/file/223724/1/ConfigMgr%20WebService%201.8.0.zip
 Tools\ConfigMgrWebService~https://raw.githubusercontent.com/SCConfigMgr/ConfigMgr/master/Operating%20System%20Deployment/Drivers/Invoke-CMApplyDriverPackage.ps1
 Tools\SQL~https://ola.hallengren.com/scripts/MaintenanceSolution.sql
+Setup\SQL~https://download.microsoft.com/download/1/9/8/1986c4a9-480b-4a46-8088-2778e0abcc8a/SSMS-Setup-ENU.exe
+Setup\SQL~https://download.microsoft.com/download/C/4/F/C4F908C9-98ED-4E5F-88D5-7D6A5004AEBD/SQLServer2017-KB4515579-x64.exe
