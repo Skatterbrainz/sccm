@@ -10,3 +10,4 @@ Tools\ConfigMgrWebService~https://raw.githubusercontent.com/SCConfigMgr/ConfigMg
 Tools\SQL~https://ola.hallengren.com/scripts/MaintenanceSolution.sql
 Setup\SQL~https://download.microsoft.com/download/1/9/8/1986c4a9-480b-4a46-8088-2778e0abcc8a/SSMS-Setup-ENU.exe
 Setup\SQL~https://download.microsoft.com/download/C/4/F/C4F908C9-98ED-4E5F-88D5-7D6A5004AEBD/SQLServer2017-KB4515579-x64.exe
+Setup\CM~http://download.microsoft.com/download/D/8/E/D8E795CE-44D7-40B7-9067-D3D1313865E5/SC_Configmgr_SCEP_TechPreview1907.exe
