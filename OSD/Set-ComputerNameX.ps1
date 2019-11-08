@@ -1,3 +1,23 @@
+<#
+.SYNOPSIS
+	Set Computer Name in Task Sequence
+.DESCRIPTION
+	Set OSDComputerName variable using serial number and form factor
+.PARAMETER Format
+	Naming format. Either "Form-Serial" or "Serial". Default is "Serial"
+.PARAMETER WorkstationPrefix
+	Prefix for Desktop/Workstation devices. Default is "WS"
+.PARAMETER LaptopPrefix
+	Prefix for Laptop devices.  Default is "LT"
+.PARAMETER NameLength
+	Overall length of name. Default is 8 characters
+.PARAMETER TrimSerialFrom
+	Which end of serial number to trim when name is too long, "Left" or "Right". Default is "Left"
+.EXAMPLE
+	Set-ComputerNameX.ps1 -Format Form-Serial -NameLength 5 -TrimSerialFrom Left -Verbose
+.EXAMPLE
+	Set-ComputerNameX.ps1 -Format Form-Serial -NameLength 4 -WorkstationPrefix "W" -Verbose
+#>
 [CmdletBinding()]
 param (
     [parameter()][ValidateSet('Serial','Form-Serial')][string] $Format = 'Serial',
