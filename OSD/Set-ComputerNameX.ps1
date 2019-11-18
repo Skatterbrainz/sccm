@@ -1,11 +1,48 @@
+<#
+.SYNOPSIS
+    Yet another device naming script for OSD
+.DESCRIPTION
+    Yet another device naming script for OSD and yes I know thats a repeat
+.PARAMETER Format
+    Naming format: Serial or Form-Serial (default: Serial)
+    Serial = BIOS Serial Number
+    Form-Serial = Form-Factor + BIOS Serial Number
+.PARAMETER WorkstationPrefix
+    Default prefix for Desktop/Workstation devices: D, DT, W, WS (default: WS)
+.PARAMETER LaptopPrefix
+    Default prefix for Laptop devices: L, LT (default: LT)
+.PARAMETER NameLength
+    Maximum characters to limit new device name (truncate if needed). Default is 8
+.PARAMETER TrimSerialFrom
+    Which side of BIOS Serial Number to trim when necessar: Left or Right (default: Left)
+.PARAMETER Delimiter
+    Option for joining naming components when -Format is Form-Serial: None, Hyphen, Underscore (default: None)
+    Hyphen: Form-SerialNumber
+    Underscore: Form_SerialNumber
+    None: FormSerialNumber
+.EXAMPLE
+    Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen
+    (laptop) "LT-67890"
+.EXAMPLE
+    Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen -NameLength 5
+    (laptop) "LT-90"
+.EXAMPLE
+    Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen -TrimSerialFrom Right
+    (laptop) "LT-12345"
+.EXAMPLE
+    Set-ComputerNameX.ps1 -Format Form-Serial
+    (laptop) "LT123456"
+#>
 [CmdletBinding()]
 param (
     [parameter()][ValidateSet('Serial','Form-Serial')][string] $Format = 'Serial',
     [parameter()][ValidateSet('D','DT','W','WS')][string] $WorkstationPrefix = 'WS',
-    [parameter()][ValidateSet('L','LT')][string] $LaptopPrefix = 'LT',
+    [parameter()][ValidateSet('L','LT')][string] $LaptopPrefix = 'L',
     [parameter()][int] $NameLength = 8,
-    [parameter()][ValidateSet('Left','Right')][string] $TrimSerialFrom
+    [parameter()][ValidateSet('Left','Right')][string] $TrimSerialFrom = 'Left',
+    [parameter()][ValidateSet('None','Hyphen','Underscore')][string] $Delimiter = 'None'
 )
+$ErrorActionPreference = 'stop'
 
 function Get-FormFactorCode {
 	[CmdletBinding()]
@@ -35,11 +72,11 @@ try {
     # get serial number
     $sn = $(Get-CimInstance -ClassName Win32_SystemEnclosure -Namespace root\cimv2).SerialNumber
     Write-Verbose "*** serial number... $sn"
-    # get chassis type
+    
     if ($sn.Length -gt $NameLength) {
         if ($TrimSerialFrom -eq 'Left') {
             $curlen = $sn.Length
-            $sn = $sn.Substring($NameLength - $curlen-1, $NameLength)
+            $sn = $sn.Substring($curlen - $NameLength, $NameLength)
         }
         else {
             $sn = $sn.Substring(0, $NameLength)
@@ -51,11 +88,16 @@ try {
     }
     else {
         $pfx = Get-FormFactorCode -Verbose:$VerbosePreference
-        $result = "$pfx`-$sn"
+        switch ($Delimiter) {
+            'Hyphen' {$result = "$pfx`-$sn"}
+            'Underscore' {$result = "$pfx`_$sn"}
+            Default {$result = "$pfx$sn"}
+        }
     }
     try {
         $tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment
-        #$tsui  = New-Object -COMObject Microsoft.SMS.TSProgressUI
+        # suppress progress form only if presenting a new UI
+        # $tsui  = New-Object -COMObject Microsoft.SMS.TSProgressUI
         Write-Verbose "*** assigning OSDComputerName to $result"
         $tsenv.Value("OSDComputerName") = $result
     }
@@ -64,7 +106,7 @@ try {
     }
 }
 catch {
-    Write-Error $_.Exception.Message 
+    Write-Error $Error[0].Exception.Message
 }
 finally {
     Write-Output $result
