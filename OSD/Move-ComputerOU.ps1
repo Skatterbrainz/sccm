@@ -26,7 +26,7 @@ param (
 )
 try {
     $CompDN = ([ADSISEARCHER]"sAMAccountName=$ComputerName`$").FindOne().Path
-    Write-Verbose "*** computer account found in directory: $env:COMPUTERNAME"
+    Write-Verbose "*** computer account found in directory: $ComputerName"
     $CompObj = [ADSI]"$CompDN"
     $CompObj.psbase.MoveTo([ADSI]"LDAP://$($OU)")
     Write-Verbose "*** computer account has been moved"
