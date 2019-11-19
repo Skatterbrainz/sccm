@@ -1,0 +1,8 @@
+192.168.1.1:VAB:OU=VirginiaBeach,OU=CORP,DC=contoso,DC=local
+192.168.2.1:VAB:OU=VirginiaBeach,OU=CORP,DC=contoso,DC=local
+192.168.3.1:NOR:OU=Norfolk,OU=CORP,DC=contoso,DC=local
+192.168.4.1:CHI:OU=Chicago,OU=CORP,DC=contoso,DC=local
+192.168.5.1:NYC:OU=NewYork,OU=CORP,DC=contoso,DC=local
+192.168.6.1:DEN:OU=Denver,OU=CORP,DC=contoso,DC=local
+192.168.7.1:SFO:OU=SanFransisco,OU=CORP,DC=contoso,DC=local
+192.168.8.1:MIA:OU=Miami,OU=CORP,DC=contoso,DC=local
