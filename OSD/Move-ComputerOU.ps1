@@ -23,14 +23,16 @@
     Move local computer account to OU specified by OSD task sequence variable "MyOUPath"
 .NOTES
     Adapted from https://ccmexec.com/2018/03/move-the-computer-to-the-correct-ou-during-osd-ps-version/
+    Updated 1911.21 to allow empty -OU and specify -TSVariable
 #>
 [CmdletBinding()]
 param (
-    [parameter(Mandatory,Position=1)][ValidateNotNullOrEmpty()][string] $OU,
+    [parameter(Position=1)][string] $OU = "",
     [parameter()][string] $TSVariable = "",
     [parameter()][string] $ComputerName = $($env:COMPUTERNAME)
 )
 try {
+    Write-Verbose "*** searching for computer $ComputerName"
     $CompDN = ([ADSISEARCHER]"sAMAccountName=$ComputerName`$").FindOne().Path
     Write-Verbose "*** computer account found in directory: $ComputerName"
     $CompObj = [ADSI]"$CompDN"
@@ -46,8 +48,7 @@ try {
         Write-Output 0    
     }
     else {
-        Write-Verbose "*** ou path was not specified or found"
-        Write-Output 2
+        throw "ou path was not specified or found"
     }
 }
 catch {
