@@ -4,6 +4,8 @@ These are a bizarre freakshow set of scripts used in conjunction with Configurat
 
 To employ these, you must include PowerShell runtime in the WinPE boot images. Tested with Windows 10 clients using Windows PowerShell 5.1 and Windows Server 2016-2019 with Windows PowerShell 5.1.
 
+Review the comments for additional details and examples within each script.
+
 # Examples
 
 ## Set-ComputerNameX.ps1
@@ -39,18 +41,19 @@ Set-ComputerNameX.ps1 -Format Form-Serial -WorkstationPrefix "D" -NameLength 6
 
 * Another GUI-based glue-sniffing, paint-fume inspired device naming script
 * Includes Department code using a string array
+* Requires desktops-ous.txt and laptops-ous.txt
 
 ```powershell
 Set-OSDComputerName6.ps1 -Verbose 
 ```
 
-Default options. Returns name from WPF form inputs: Prefix (Dept) + SerialNum + Suffix (optional)
+Default options. Returns name from WPF form inputs: Prefix (Dept) + SerialNum + Suffix (optional).  If device has serial number "1234567890" and department "ITS" is chosen, the result name would be "ITS-12345678"
 
 ```powershell
 Set-OSDComputerName6.ps1 -MaxSerialLen 5 -DefaulOU "OU=Disabled,OU=Computers,OU=CORP,DC=contoso,DC=local" -DepartmentsList ("ITS","ACC","EXT","FIN","HRS") -DefaultDeptCode "ITS"
 ```
 
-Displays form with department codes list in Prefix select-list, last 7 chars of SerialNumber, and blank Suffix
+Displays form with department codes list in Prefix select-list, last 7 chars of SerialNumber, and blank Suffix.  If device has serial number "1234567890" and department "ITS" is chose, the result name would be "ITS-12345"
 
 ## Test-CMDeviceNameADConflict.ps1
 
