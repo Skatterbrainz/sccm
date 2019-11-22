@@ -1,8 +1,8 @@
 # Overview
 
-These are a bizare freakshow set of scripts used in conjunction with Configuration Manager (MEMCM) OSD Task Sequences to manipulate device names and/or Active Directory OU locations, during imaging.
+These are a bizarre freakshow set of scripts used in conjunction with Configuration Manager (MEMCM) OSD Task Sequences to manipulate device names and/or Active Directory OU locations, during imaging.
 
-To employ these, you must include PowerShell runtime in the WinPE boot images.
+To employ these, you must include PowerShell runtime in the WinPE boot images. Tested with Windows 10 clients using Windows PowerShell 5.1 and Windows Server 2016-2019 with Windows PowerShell 5.1.
 
 # Examples
 
@@ -34,6 +34,23 @@ Set-ComputerNameX.ps1 -Format Form-Serial -WorkstationPrefix "D" -NameLength 6
 ```
 
 (desktop w/SN "1234567890") returns "D67890"
+
+## Set-OSDComputerName6.ps1
+
+* Another GUI-based glue-sniffing, paint-fume inspired device naming script
+* Includes Department code using a string array
+
+```powershell
+Set-OSDComputerName6.ps1 -Verbose 
+```
+
+Default options. Returns name from WPF form inputs: Prefix (Dept) + SerialNum + Suffix (optional)
+
+```powershell
+Set-OSDComputerName6.ps1 -MaxSerialLen 5 -DefaulOU "OU=Disabled,OU=Computers,OU=CORP,DC=contoso,DC=local" -DepartmentsList ("ITS","ACC","EXT","FIN","HRS") -DefaultDeptCode "ITS"
+```
+
+Displays form with department codes list in Prefix select-list, last 7 chars of SerialNumber, and blank Suffix
 
 ## Test-CMDeviceNameADConflict.ps1
 
