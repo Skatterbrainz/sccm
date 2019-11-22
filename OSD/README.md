@@ -9,25 +9,25 @@
 Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen
 ```
 
-(laptop) "LT-67890"
+(laptop w/SN "1234567890") returns "LT-67890"
 
 ```powershell
 Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen -NameLength 5
 ```
 
-(laptop) "LT-90"
+(laptop w/SN "1234567890") returns "LT-90"
 
 ```powershell
 Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen -TrimSerialFrom Right
 ```
 
-(desktop) "WS-12345"
+(desktop w/SN "1234567890") returns "WS-12345"
 
 ```powershell
 Set-ComputerNameX.ps1 -Format Form-Serial -WorkstationPrefix "D" -NameLength 6
 ```
 
-(desktop) "D12345"
+(desktop w/SN "1234567890") returns "D67890"
 
 ## Test-CMDeviceNameADConflict.ps1
 
