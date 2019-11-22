@@ -1,3 +1,9 @@
+# Overview
+
+These are a bizare freakshow set of scripts used in conjunction with Configuration Manager (MEMCM) OSD Task Sequences to manipulate device names and/or Active Directory OU locations, during imaging.
+
+To employ these, you must include PowerShell runtime in the WinPE boot images.
+
 # Examples
 
 ## Set-ComputerNameX.ps1
