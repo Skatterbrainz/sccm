@@ -14,7 +14,7 @@
     Explicit computer name to use, for testing purposes.
     The default is "", and TS variable OSDComputerName is used during task sequence execution
 .PARAMETER Delete
-    Delete AD computer account if found
+    Delete computer account in AD and CM DB if found in AD
 .EXAMPLE
     Test-CMDeviceNameADConflict.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "12352342" -TSVariable "ACCTEXISTS"
     Sets TS variable "ACCTEXISTS" to "TRUE" if %OSDComputerName% value exists in Active Directory domain
@@ -27,6 +27,7 @@
     This is mainly for testing outside of a task sequence environment
 .NOTES
     Requires the ConfigMgrWebService from SCConfigMgr.com
+    added RemoveCMDeviceByName step after AD account delete (only if -Delete is used)
 #>
 [CmdletBinding()]
 param (
@@ -61,6 +62,8 @@ try {
         if ($Delete) {
             Write-Verbose "*** deleting $ComputerName`$ from Active Directory"
             $ws.RemoveADComputer($SecretKey, "$ComputerName`$") | Out-Null
+            Write-Verbose "*** deleting $ComputerName from cm database"
+            $ws.RemoveCMDeviceByName($SecretKey, "$ComputerName") | Out-Null
             if ($tsActive) { $tsenv.Value("$TSVariable") = "FALSE" }
             Write-Verbose "*** account has been deleted"
         }
