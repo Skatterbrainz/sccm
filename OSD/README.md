@@ -47,13 +47,13 @@ Set-ComputerNameX.ps1 -Format Form-Serial -WorkstationPrefix "D" -NameLength 6
 Set-OSDComputerName6.ps1 -Verbose 
 ```
 
-Default options. Returns name from WPF form inputs: Prefix (Dept) + SerialNum + Suffix (optional)
+Default options. Returns name from WPF form inputs: Prefix (Dept) + SerialNum + Suffix (optional).  If device has serial number "1234567890" and department "ITS" is chosen, the result name would be "ITS-12345678"
 
 ```powershell
 Set-OSDComputerName6.ps1 -MaxSerialLen 5 -DefaulOU "OU=Disabled,OU=Computers,OU=CORP,DC=contoso,DC=local" -DepartmentsList ("ITS","ACC","EXT","FIN","HRS") -DefaultDeptCode "ITS"
 ```
 
-Displays form with department codes list in Prefix select-list, last 7 chars of SerialNumber, and blank Suffix
+Displays form with department codes list in Prefix select-list, last 7 chars of SerialNumber, and blank Suffix.  If device has serial number "1234567890" and department "ITS" is chose, the result name would be "ITS-12345"
 
 ## Test-CMDeviceNameADConflict.ps1
 
