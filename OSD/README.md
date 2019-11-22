@@ -31,6 +31,17 @@ Set-ComputerNameIncrementAD.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebServ
 
 If WS001 and WS002 exist in AD, but not WS003, then this will return WS003
 
+## Set-ComputerNameIncrementCM.ps1
+
+* Query CM database for next available sequential device name, updates TS var OSDComputerName
+* Requires ConfigMgr Web Service (https://www.scconfigmgr.com)
+
+```powershell
+Set-ComputerNameIncrementCM.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "019230912309" -Prefix "WS" -NameLength 5
+```
+
+If WS001 and WS002 exist in the CM database, but not WS003, then this would return WS003
+
 ## Set-ComputerOUPath.ps1
 
 * Set AD OU Path in CM OSD Task Sequence using IP Gateway
