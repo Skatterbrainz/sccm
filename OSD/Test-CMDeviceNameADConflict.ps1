@@ -13,6 +13,8 @@
 .PARAMETER ComputerName
     Explicit computer name to use, for testing purposes.
     The default is "", and TS variable OSDComputerName is used during task sequence execution
+.PARAMETER Delete
+    Delete AD computer account if found
 .EXAMPLE
     Test-CMDeviceNameADConflict.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "12352342" -TSVariable "ACCTEXISTS"
     Sets TS variable "ACCTEXISTS" to "TRUE" if %OSDComputerName% value exists in Active Directory domain
@@ -28,7 +30,8 @@ param (
     [parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $URI,
     [parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $SecretKey,
     [parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $TSVariable,
-    [parameter()][string] $ComputerName = ""
+    [parameter()][string] $ComputerName = "",
+    [switch] $Delete
 )
 try {
     $tsenv = New-Object -ComObject Microsoft.SMS.TSEnvironment
@@ -56,6 +59,14 @@ try {
         else {
             Write-Verbose "*** $TSVariable = 'TRUE'"
         }
+        if ($Delete) {
+            Write-Verbose "*** deleting $ComputerName`$ from Active Directory"
+            $result = $ws.RemoveADComputer($SecretKey, "$ComputerName`$")
+            Write-Verbose "*** account has been deleted"
+        }
+    }
+    else {
+        Write-Verbose "*** account was not found"
     }
 }
 catch {
