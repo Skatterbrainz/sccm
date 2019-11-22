@@ -22,11 +22,37 @@ Sets TS variable "ACCTEXISTS" to "TRUE" if computer "WS004"" exists in Active Di
 
 ## Set-ComputerNameIncrementAD.ps1
 
+* Query AD for next available sequential device name, updates TS var OSDComputerName
+* Requires ConfigMgr Web Service (https://www.scconfigmgr.com)
+
 ```powershell
 Set-ComputerNameIncrementAD.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "019230912309" -Prefix "WS" -NameLength 5
 ```
 
 If WS001 and WS002 exist in AD, but not WS003, then this will return WS003
+
+## Set-ComputerOUPath.ps1
+
+* Set AD OU Path in CM OSD Task Sequence using IP Gateway
+* Requires file: oulocations.txt
+
+```powershell
+Set-ComputerOUPath.ps1
+```
+
+Look for matching row in oulocations.txt using actual IPv4 gateway
+
+```powershell
+Set-ComputerOUPath.ps1 -Gateway "192.168.3.1"
+```
+
+Look for matching row in oulocations.txt using forced IPv4 gateway value
+
+```powershell
+Set-ComputerOUPath.ps1 -DataFile "oulocations2.txt"
+```
+
+Look for matching row in custom data file using actual IPv4 gateway. Default file is oulocations.txt
 
 ## Move-ComputerOU.ps1
 
