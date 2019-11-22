@@ -4,6 +4,8 @@ These are a bizarre freakshow set of scripts used in conjunction with Configurat
 
 To employ these, you must include PowerShell runtime in the WinPE boot images. Tested with Windows 10 clients using Windows PowerShell 5.1 and Windows Server 2016-2019 with Windows PowerShell 5.1.
 
+Review the comments for additional details and examples within each script.
+
 # Examples
 
 ## Set-ComputerNameX.ps1
@@ -39,6 +41,7 @@ Set-ComputerNameX.ps1 -Format Form-Serial -WorkstationPrefix "D" -NameLength 6
 
 * Another GUI-based glue-sniffing, paint-fume inspired device naming script
 * Includes Department code using a string array
+* Requires desktops-ous.txt and laptops-ous.txt
 
 ```powershell
 Set-OSDComputerName6.ps1 -Verbose 
