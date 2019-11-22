@@ -19,3 +19,22 @@ Test-CMDeviceNameADConflict.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebServ
 ```
 
 Sets TS variable "ACCTEXISTS" to "TRUE" if computer "WS004"" exists in Active Directory domain. This is mainly for testing outside of a task sequence environment
+
+## Move-ComputerOU.ps1
+
+```powershell
+Move-ComputerOU.ps1 -OU "OU=Workstations,OU=Chicago,OU=CORP,DC=contoso,DC=local"
+```
+
+Move local computer account into OU path
+```powershell
+Move-ComputerOU.ps1 -OU "OU=Workstations,OU=Chicago,OU=CORP,DC=contoso,DC=local" -ComputerName "WS001"
+```
+
+Move computer WS001 to OU path
+
+```powershell
+Move-ComputerOU.ps1 -OU %MachinObjectOU%
+```
+
+Move local computer account to OU specified by OSD task sequence variable
