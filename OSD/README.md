@@ -1,5 +1,34 @@
 # Examples
 
+## Set-ComputerNameX.ps1
+
+* Sets OSDComputerName using standard naming glue-sniffing formats
+* No GUI forms, silent ninja style execution
+
+```powershell
+Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen
+```
+
+(laptop) "LT-67890"
+
+```powershell
+Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen -NameLength 5
+```
+
+(laptop) "LT-90"
+
+```powershell
+Set-ComputerNameX.ps1 -Format Form-Serial -Delimiter Hyphen -TrimSerialFrom Right
+```
+
+(desktop) "WS-12345"
+
+```powershell
+Set-ComputerNameX.ps1 -Format Form-Serial -WorkstationPrefix "D" -NameLength 6
+```
+
+(desktop) "D12345"
+
 ## Test-CMDeviceNameADConflict.ps1
 
 ```powershell
