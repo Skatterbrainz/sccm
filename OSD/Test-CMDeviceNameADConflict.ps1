@@ -19,6 +19,9 @@
     Test-CMDeviceNameADConflict.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "12352342" -TSVariable "ACCTEXISTS"
     Sets TS variable "ACCTEXISTS" to "TRUE" if %OSDComputerName% value exists in Active Directory domain
 .EXAMPLE
+    Test-CMDeviceNameADConflict.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "12352342" -TSVariable "ACCTEXISTS" -Delete
+    Sets TS variable "ACCTEXISTS" to "TRUE" if %OSDComputerName% value exists in Active Directory domain
+.EXAMPLE
     Test-CMDeviceNameADConflict.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "12352342" -TSVariable "ACCTEXISTS" -ComputerName "WS004"
     Sets TS variable "ACCTEXISTS" to "TRUE" if computer "WS004"" exists in Active Directory domain
     This is mainly for testing outside of a task sequence environment
@@ -53,19 +56,17 @@ try {
     }
     Write-Verbose "*** searching for account: $ComputerName"
     if (![string]::IsNullOrEmpty(($ws.GetADComputer($SecretKey, $ComputerName)).SamAccountName)) {
-        if ($tsActive) {
-            $tsenv.Value("$TSVariable") = "TRUE"
-        }
-        else {
-            Write-Verbose "*** $TSVariable = 'TRUE'"
-        }
+        if ($tsActive) { $tsenv.Value("$TSVariable") = "TRUE" }
+        Write-Verbose "*** Set $TSVariable = 'TRUE'"
         if ($Delete) {
             Write-Verbose "*** deleting $ComputerName`$ from Active Directory"
-            $result = $ws.RemoveADComputer($SecretKey, "$ComputerName`$")
+            $ws.RemoveADComputer($SecretKey, "$ComputerName`$") | Out-Null
+            if ($tsActive) { $tsenv.Value("$TSVariable") = "FALSE" }
             Write-Verbose "*** account has been deleted"
         }
     }
     else {
+        if ($tsActive) { $tsenv.Value("$TSVariable") = "FALSE" }
         Write-Verbose "*** account was not found"
     }
 }
