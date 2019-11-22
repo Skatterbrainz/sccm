@@ -25,6 +25,7 @@
     Set-OSDComputerName6.ps1 -Verbose 
 .NOTES
     1910.1400 - DS - Forked from v5. Forked sounds funny. Why not spooned?
+    1911.2200 - DS - fixed incorrect ou mapping filenames
 #>
 [CmdletBinding()]
 param (
@@ -57,14 +58,14 @@ function Get-ComputerNameInput {
         $sn = $sn.Substring(0,$MaxSerialLen)
     }
     $mn  = (Get-CimInstance -ClassName Win32_ComputerSystem).Model
-    $nic = @(Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | ? {$_.DhcpEnabled -eq $True -and $_.DefaultIPGateway.Length -gt 0})[0]
+    $nic = @(Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object {$_.DhcpEnabled -eq $True -and $_.DefaultIPGateway.Length -gt 0})[0]
     $mac = $nic.MacAddress
     if ($nic.Count -gt 0) {
         $ipa = $nic.IPAddress[0]
         $ipt = "DHCP"
     }
     else {
-        $nic = @(Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | ? {$null -ne $_.IPAddress})
+        $nic = @(Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object {$null -ne $_.IPAddress})
         $mac = $nic.MacAddress
         $ipa = $nic.IPAddress[0]
         $ipt = "STATIC"
@@ -226,10 +227,10 @@ function Get-DeviceOU {
         [parameter(Mandatory)][ValidateLength(1,1)][string] $FormFactorCode
     )
     if ($FormFactorCode -eq "D") {
-        $ouFile = "tia-desktops-ous.txt"
+        $ouFile = "desktops-ous.txt"
     }
     else {
-        $ouFile = "tia-laptops-ous.txt"
+        $ouFile = "laptops-ous.txt"
     }
     $oupath = ""
     $ouFilePath = Join-Path -Path $PSScriptRoot -ChildPath $ouFile
@@ -239,13 +240,13 @@ function Get-DeviceOU {
     }
     try {
         $oulist = Get-Content $ouFilePath
-        $oupath = $oulist | %{
+        $oupath = $oulist | Foreach-Object {
             $tmp = $_ -split '~'
             [pscustomobject]@{
                 Dept = $tmp[0]
                 OU   = $tmp[1]
             }
-        } | ? {$_.Dept -eq $DeptCode} | Select -ExpandProperty OU
+        } | Where-Object {$_.Dept -eq $DeptCode} | Select-Object -ExpandProperty OU
         if ([string]::IsNullOrEmpty($oupath)) {
             Write-Verbose "*** $LogPrefix : mapping not found, using default OU path"
             $oupath = $DefaultOU
