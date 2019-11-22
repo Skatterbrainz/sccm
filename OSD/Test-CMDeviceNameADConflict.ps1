@@ -1,7 +1,27 @@
 <#
 .SYNOPSIS
+    Checks if Computer Name already exists in AD domain
 .DESCRIPTION
-
+    Checks if Computer Name already exists in AD domain.
+    Sets task sequence variable (TSVariable) to "TRUE" if found.
+.PARAMETER URI
+    URI to web service.This is typically the "http://<SMSProvider>/ConfigMgrWebService/ConfigMgr.asmx"
+.PARAMETER SecretKey
+    The secret key string set during ConfigMgrWebService installation
+.PARAMETER TSVariable
+    Name of task sequence variable to set/update
+.PARAMETER ComputerName
+    Explicit computer name to use, for testing purposes.
+    The default is "", and TS variable OSDComputerName is used during task sequence execution
+.EXAMPLE
+    Test-CMDeviceNameADConflict.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "12352342" -TSVariable "ACCTEXISTS"
+    Sets TS variable "ACCTEXISTS" to "TRUE" if %OSDComputerName% value exists in Active Directory domain
+.EXAMPLE
+    Test-CMDeviceNameADConflict.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "12352342" -TSVariable "ACCTEXISTS" -ComputerName "WS004"
+    Sets TS variable "ACCTEXISTS" to "TRUE" if computer "WS004"" exists in Active Directory domain
+    This is mainly for testing outside of a task sequence environment
+.NOTES
+    Requires the ConfigMgrWebService from SCConfigMgr.com
 #>
 [CmdletBinding()]
 param (
