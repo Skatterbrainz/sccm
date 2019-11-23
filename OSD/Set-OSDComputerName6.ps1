@@ -38,7 +38,7 @@ param (
     [parameter()][string] $FormBackground = "#fff",
     [parameter()][string] $LogPrefix = 'SKBZ'
 )
-$Script:ScriptVersion = "1910.1400"
+$Script:ScriptVersion = "1911.2200"
 
 function Get-ComputerNameInput {
     [CmdletBinding()]
@@ -220,46 +220,6 @@ function Get-FormFactorCode {
     catch {}
 }
 
-function Get-DeviceOU {
-    [CmdletBinding()]
-    param (
-        [parameter(Mandatory)][ValidateLength(3,3)][string] $DeptCode,
-        [parameter(Mandatory)][ValidateLength(1,1)][string] $FormFactorCode
-    )
-    if ($FormFactorCode -eq "D") {
-        $ouFile = "desktops-ous.txt"
-    }
-    else {
-        $ouFile = "laptops-ous.txt"
-    }
-    $oupath = ""
-    $ouFilePath = Join-Path -Path $PSScriptRoot -ChildPath $ouFile
-    if (!(Test-Path $ouFilePath)) {
-        Write-Output "failed to located $ouFilePath"
-        break
-    }
-    try {
-        $oulist = Get-Content $ouFilePath
-        $oupath = $oulist | Foreach-Object {
-            $tmp = $_ -split '~'
-            [pscustomobject]@{
-                Dept = $tmp[0]
-                OU   = $tmp[1]
-            }
-        } | Where-Object {$_.Dept -eq $DeptCode} | Select-Object -ExpandProperty OU
-        if ([string]::IsNullOrEmpty($oupath)) {
-            Write-Verbose "*** $LogPrefix : mapping not found, using default OU path"
-            $oupath = $DefaultOU
-        }
-    }
-    catch {
-        Write-Verbose "ERROR: $($_.Exception.Message)"
-    }
-    finally {
-        Write-Output $oupath
-    }
-}
-
 Write-Verbose "*** $LogPrefix : script version: $($Script:ScriptVersion)"
 
 try {
@@ -288,15 +248,10 @@ Write-Verbose "*** $LogPrefix : dept code......... $($Script:DeptCode)"
 Write-Verbose "*** $LogPrefix : suffix............ $($Script:Suffix)"
 Write-Verbose "*** $LogPrefix : new name.......... $newname"
 
-$oupath = Get-DeviceOU -DeptCode $Script:DeptCode -FormFactorCode $ffcode
-$oupath = "LDAP://$oupath"
-Write-Verbose "*** $LogPrefix : ou path = $oupath"
-
 try {
     if ($TSActive) {
         Write-Verbose "*** $LogPrefix : assigning task sequence variables"
         $tsenv.Value("OSDComputerName") = $newname
-        $tsenv.Value("OSDDomainOUName") = $oupath
         $tsenv.Value("DEPTCODE") = $Script:DeptCode
         $tsenv.Value("FORMFACTOR") = $ffcode
         $tsenv.Value("SUFFIX") = $Script:Suffix
@@ -305,7 +260,6 @@ try {
     else {
         Write-Verbose "*** $LogPrefix : *** running in interactive mode ***"
         Write-Verbose "*** $LogPrefix : OSDComputerName = $newname"
-        Write-Verbose "*** $LogPrefix : OSDDomainOUName = $oupath"
         Write-Verbose "*** $LogPrefix : DEPTCODE = $($Script:DeptCode)"
         Write-Verbose "*** $LogPrefix : FORMFACTOR = $ffcode"
         Write-Verbose "*** $LogPrefix : SUFFIX = $($Script:Suffix)"
