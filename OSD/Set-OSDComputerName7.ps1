@@ -26,6 +26,8 @@
 	and "NYC-L-00002" exists in AD, then next name is "NYC-L-00003"
 .NOTES
 	Requires the ConfigMgrWebService from SCConfigMgr.com
+	20.04.30 - first release without being intoxicated
+	20.05.04 - fixed suffixlength parameter bug, still sober
 #>
 [CmdletBinding()]
 param (
@@ -33,7 +35,7 @@ param (
 	[parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $SecretKey,
 	[parameter()][ValidateSet('None','Hyphen','Underscore')][string] $Delimiter = 'None',
 	[parameter()] [string] $LocationFile = $(Join-Path $PSScriptRoot 'locations.txt'),
-	[parameter()][ValidateRange(3,15)][int] $NameLength = 4
+	[parameter()][ValidateRange(2,15)][int] $SuffixLength = 4
 )
 
 #region functions
@@ -45,7 +47,7 @@ function Get-NextADDeviceName {
 		Write-Verbose "### connecting to web service at $URI"
 		$ws = New-WebServiceProxy -Uri $URI -ErrorAction 'stop'
 		for ($index = 1; $index -lt 100; $index++) {
-			$nextname = $Prefix + $([string]$index).PadLeft($NameLength - $($Prefix.Length), "0")
+			$nextname = $Prefix + $([string]$index).PadLeft($SuffixLength, "0")
 			Write-Verbose "### checking name: $nextname"
 			$found = ($ws.GetADComputer($SecretKey, $nextname)).SamAccountName
 			if (![string]::IsNullOrEmpty($found)) {
