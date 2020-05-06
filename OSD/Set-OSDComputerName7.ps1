@@ -28,6 +28,7 @@
 	Requires the ConfigMgrWebService from SCConfigMgr.com
 	20.04.30 - first release without being intoxicated
 	20.05.04 - fixed suffixlength parameter bug, still sober
+	20.05.06 - fixed verbose in nested functions
 #>
 [CmdletBinding()]
 param (
@@ -40,6 +41,7 @@ param (
 
 #region functions
 function Get-NextADDeviceName {
+	[CmdletBinding()]
 	param (
 		[parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $Prefix
 	)
@@ -103,6 +105,7 @@ function Get-LocationCode {
 		10.0.0.1=NEWYORK,NYC
 		10.2.0.1=LOSANGELES,LAX
 		#>
+		Write-Verbose "### ip gateway = $gwa"
 		if (-not(Test-Path -Path $DataFile)) {
 			Write-Verbose "### data file not found: $DataFile"
 			Write-Output ""
@@ -139,7 +142,7 @@ function Get-LocationCode {
 #endregion
 
 Write-Verbose "### begin set-osdcomputername7"
-$loc = Get-LocationCode
+$loc = Get-LocationCode -Verbose:$VerbosePreference
 Write-Verbose "### location code = $loc"
 $ffx = Get-FormFactorCode -Verbose:$VerbosePreference
 Write-Verbose "### form factor = $ffx"
@@ -151,7 +154,7 @@ switch ($Delimiter) {
 }
 Write-Verbose "### base name = $pfx"
 
-$cn = Get-NextADDeviceName -Prefix $pfx
+$cn = Get-NextADDeviceName -Prefix $pfx -Verbose:$VerbosePreference
 Write-Verbose "### proposed name = $cn"
 
 try {
