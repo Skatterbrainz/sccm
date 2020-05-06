@@ -1,6 +1,6 @@
 SELECT DISTINCT
-	Caption0 AS Name,
-	BuildNumber0 AS Build,
+	Caption0 AS OSName,
+	BuildNumber0 AS OSBuild,
 	CSDVersion0 AS SvcPack,
 	OSArchitecture0 AS Arch,
 	OSLanguage0 AS Lang,
