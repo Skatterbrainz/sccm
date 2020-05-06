@@ -28,14 +28,14 @@
 	Requires the ConfigMgrWebService from SCConfigMgr.com
 	20.04.30 - first release without being intoxicated
 	20.05.04 - fixed suffixlength parameter bug, still sober
-	20.05.06 - fixed verbose in nested functions
+	20.05.06 - fixed verbose in nested functions, and $LocationFile default value
 #>
 [CmdletBinding()]
 param (
 	[parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $URI,
 	[parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $SecretKey,
 	[parameter()][ValidateSet('None','Hyphen','Underscore')][string] $Delimiter = 'None',
-	[parameter()] [string] $LocationFile = $(Join-Path $PSScriptRoot 'locations.txt'),
+	[parameter()] [string] $LocationFile = ".\locations.txt",
 	[parameter()][ValidateRange(2,15)][int] $SuffixLength = 4
 )
 
