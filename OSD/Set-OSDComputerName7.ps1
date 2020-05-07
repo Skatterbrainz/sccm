@@ -35,7 +35,7 @@
 	20.04.30 - first release without being intoxicated
 	20.05.04 - fixed suffixlength parameter bug, still sober
 	20.05.06 - fixed verbose in nested functions, and $LocationFile default value
-	20.05.07 - added DefaultLocationCode parameter
+	20.05.07 - added DefaultLocationCode parameter, moved gateway table inside code
 #>
 [CmdletBinding()]
 param (
@@ -99,53 +99,27 @@ function Get-FormFactorCode {
 function Get-LocationCode {
 	[CmdletBinding()]
 	param (
-		[parameter()][string] $DefaultLoc = "",
-		[parameter()][string] $DataFile = $LocationFile
+		[parameter()][string] $DefaultLoc = ""
 	)
 	try {
+		$result = $null
 		Write-Verbose "### querying network interface properties"
 		$gwa = $(Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | 
 			Where-Object {$_.IPEnabled -eq $True -and $_.DefaultIPGateway -ne '::'} | 
 				Select-Object -ExpandProperty DefaultIPGateway).Trim()
-		<#
-		format of location data file is as follows:
-		GATEWAY=FULLNAME,ABBREV (no headings in file, shown here just for explanation)
-		Examples:
-		10.0.0.1=NEWYORK,NYC
-		10.2.0.1=LOSANGELES,LAX
-		192.168.1.1=CHICAGO,CHI
-		#>
 		Write-Verbose "### ip gateway = $gwa"
-		if (-not(Test-Path -Path $DataFile)) {
-			Write-Verbose "### data file not found: $DataFile"
-			Write-Output ""
-			break
+		switch ($gwa) {
+			'192.168.1.1' { $result = 'NYC' }
+			'192.168.2.1' { $result = 'CHI' }
+			# add more if needed
+			Default { $result = $DefaultLoc }
 		}
-		Write-Verbose "### loading location mapping file: $DataFile"
-		$shortname = ""
-		$dataset = Get-Content -Path $DataFile
-		if ($dataset.length -gt 0) {
-			Write-Verbose "### data loaded from text file"
-		}
-		foreach ($row in $dataset) {
-			$rowdata = $row -split '='
-			$gateway = $rowdata[0]
-			if ($gateway -eq $gwa) {
-				$location  = $rowdata[1]
-				$fullname  = ($location -split ',')[0]
-				$shortname = ($location -split ',')[1]
-				Write-Verbose "### location: $fullname"
-				Write-Verbose "### shortname: $shortname"
-				break
-			}
-		}
-		if ($shortname -eq "") { $shortname = $DefaultLoc }
-		Write-Verbose "### location code is: $shortname"
-		Write-Output $shortname
 	}
 	catch {
-		Write-Error $Error[0].Exception.Message
-		Write-Output ""
+		Write-Error "$($Error[0].Exception.Message -join ',')"
+	}
+	finally {
+		Write-Output $result
 	}
 }
 
