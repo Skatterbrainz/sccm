@@ -16,6 +16,8 @@
 	None: FormSerialNumber
 .PARAMETER LocationFile
 	Name of location lookup file. Default is "locations.txt" in the module path
+.PARAMETER DefaultLocationCode
+	Value to use for LOC part of name when gateway IP lookup does not return a match
 .EXAMPLE
 	Set-OSDComputerName7.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "019230912309" -SuffixLength 5
 	Assuming IP gateway matches in locations.txt and returns "NYC", and form factor is "L" (laptop)
@@ -24,11 +26,16 @@
 	Set-OSDComputerName7.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "019230912309" -SuffixLength 5 -Delimiter Hyphen
 	Assuming IP gateway matches in locations.txt and returns "NYC", and form factor is "L" (laptop)
 	and "NYC-L-00002" exists in AD, then next name is "NYC-L-00003"
+.EXAMPLE
+	Set-OSDComputerName7.ps1 -URI "http://cm01.contoso.local/ConfigMgrWebService/ConfigMgr.asmx" -SecretKey "019230912309" -SuffixLength 5 -Delimiter Hyphen -DefaultLocationCode "LAX"
+	Assuming IP gateway finds no match in locations.txt, and form factor is "L" (laptop)
+	and "LAX-L-00002" exists in AD, then next name is "LAX-L-00003"
 .NOTES
 	Requires the ConfigMgrWebService from SCConfigMgr.com
 	20.04.30 - first release without being intoxicated
 	20.05.04 - fixed suffixlength parameter bug, still sober
 	20.05.06 - fixed verbose in nested functions, and $LocationFile default value
+	20.05.07 - added DefaultLocationCode parameter
 #>
 [CmdletBinding()]
 param (
@@ -36,9 +43,10 @@ param (
 	[parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $SecretKey,
 	[parameter()][ValidateSet('None','Hyphen','Underscore')][string] $Delimiter = 'None',
 	[parameter()] [string] $LocationFile = ".\locations.txt",
-	[parameter()][ValidateRange(2,15)][int] $SuffixLength = 4
+	[parameter()][ValidateRange(2,15)][int] $SuffixLength = 4,
+	[parameter()][string] $DefaultLocationCode = ""
 )
-
+Write-Verbose "### Set-OSDComputerName7 - version 20.05.07"
 #region functions
 function Get-NextADDeviceName {
 	[CmdletBinding()]
@@ -96,14 +104,16 @@ function Get-LocationCode {
 	)
 	try {
 		Write-Verbose "### querying network interface properties"
-		$gwa = Get-WmiObject -Class Win32_NetworkAdapterConfiguration | 
+		$gwa = $(Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | 
 			Where-Object {$_.IPEnabled -eq $True -and $_.DefaultIPGateway -ne '::'} | 
-				Select-Object -ExpandProperty DefaultIPGateway
+				Select-Object -ExpandProperty DefaultIPGateway).Trim()
 		<#
-		format of location data is as follows:
+		format of location data file is as follows:
 		GATEWAY=FULLNAME,ABBREV (no headings in file, shown here just for explanation)
+		Examples:
 		10.0.0.1=NEWYORK,NYC
 		10.2.0.1=LOSANGELES,LAX
+		192.168.1.1=CHICAGO,CHI
 		#>
 		Write-Verbose "### ip gateway = $gwa"
 		if (-not(Test-Path -Path $DataFile)) {
@@ -165,4 +175,7 @@ try {
 catch {
 	Write-Verbose "### not running in a task sequence"
 	Write-Verbose "### would have assigned OSDComputerName to $cn"
+}
+finally {
+	Write-Output $cn
 }
