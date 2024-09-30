@@ -7,8 +7,9 @@ if (!(Get-Module dbatools -ListAvailable)) {
 }
 $queryFiles = Get-ChildItem -Path $Path -Filter "*.sql"
 if ($queryFiles.Count -gt 0) {
-  $queryFile = $queryFiles | Out-GridView -Title "Select Query to Run" -OutputMode Single
+  $queryFile = $queryFiles | Select-Object Name,FullName | Out-GridView -Title "Select Query to Run" -OutputMode Single
   if ($queryFile) {
-    $query = Invoke-DbaQuery -SqlInstance $SqlInstance -Query $query
+    $query = Get-Content $queryFile.FullName
+    Invoke-DbaQuery -SqlInstance $SqlInstance -Query $query
   }
 }
